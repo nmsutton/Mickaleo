@@ -15,3 +15,8 @@ Android client:
 3.  Interaction mode. Track accelerometer movements and have them move the host OS mouse. Create mouse movement in window or new display output of program being streamed which is a different window/program than the one creating the VR split view.
 
 4.  Optional: Create gamepad or VR accessory interactivity with the software running so that mouse and keyboard, etc. do not need to be used.
+
+## Dependencies:
+For x11 development:
+xorg-dev
+libx11-dev
