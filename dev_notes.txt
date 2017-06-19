@@ -1,0 +1,4 @@
+06/19/17
+If a display on one monitor was streamed to a second monitor, the 
+second monitor could have the left/right eye display adjustements 
+made. the 2cnd monitor could then be streamed to the headset.
