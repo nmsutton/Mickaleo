@@ -2,9 +2,9 @@
 
 This project is designed to add at least basic VR to any program on Linux with any VR headset. Eventually it could be a cross platform program to add VR to any program with any headset.
 
-##Deliverables:
+## Deliverables:
 
-1. *This goal has been already completed* High performance video streaming to headsets. I have a Durovis Dive 7 headset with Nexus 7 2cnd Gen tablet I stream VR content to. Any remote desktop software is compatible but I recommend Splashtop.  Splashtop is free for personal use and specifically designed for high performance video game level quality streaming. It works but should be used for personal use, if you want to use it professionally, please support them. Please support Splashtop in any situation because it is the best streaming software I have seen compatible with linux, it runs approximately realtime for full 3d software for me.
+1. \*This goal has been already completed\* High performance video streaming to headsets. I have a Durovis Dive 7 headset with Nexus 7 2cnd Gen tablet I stream VR content to. Any remote desktop software is compatible but I recommend Splashtop.  Splashtop is free for personal use and specifically designed for high performance video game level quality streaming. It works but should be used for personal use, if you want to use it professionally, please support them. Please support Splashtop in any situation because it is the best streaming software I have seen compatible with linux, it runs approximately realtime for full 3d software for me.
 Download links for splashtop:
 Linux server:
 Android client:
