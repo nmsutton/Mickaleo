@@ -117,8 +117,11 @@ int main()
     XMapWindow(display2, frame_window);
 
     //const char* array2;
-    CImg<unsigned char> desktop(pic);
-    CImgDisplay main_disp(desktop,"Desktop Screenshot");
+    CImg<unsigned char> left_eye_display(pic);
+    left_eye_display = left_eye_display.get_crop(0,0,0,1,pic.width()*.5,pic.height(),0,1);
+    left_eye_display = left_eye_display.resize(100,100,100,100);
+    CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
+    //CImgDisplay main_disp(desktop,"Desktop Screenshot");
 
     while ( 1 ) {
         XNextEvent(display2, (XEvent *)&event);
@@ -140,6 +143,7 @@ int main()
 
                 //CImgDisplay main_disp(pic2, array2.c_str() );
                 //CImgDisplay main_disp(pic,"Desktop Screenshot");
+                //CImgDisplay main_disp(desktop,"Desktop Screenshot");
                 break;
             }
             default:
