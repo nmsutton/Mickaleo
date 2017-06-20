@@ -119,7 +119,7 @@ int main()
     //const char* array2;
     CImg<unsigned char> left_eye_display(pic);
     left_eye_display = left_eye_display.get_crop(0,0,0,1,pic.width()*.5,pic.height(),0,1);
-    left_eye_display = left_eye_display.resize(100,100,100,100);
+    left_eye_display = left_eye_display.resize(500,500,1,100);
     CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
     //CImgDisplay main_disp(desktop,"Desktop Screenshot");
 
