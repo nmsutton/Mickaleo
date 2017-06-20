@@ -120,8 +120,8 @@ int main()
     //const char* array2;
     CImg<unsigned char> left_eye_display(pic);
     CImg<unsigned char> right_eye_display(pic);
-    left_eye_display = left_eye_display.get_crop(0,0,0,1,pic.width()*.5,pic.height(),0,1);
-    right_eye_display = right_eye_display.get_crop((pic.width()*.5)+1,0,0,1,pic.width(),pic.height(),0,1);
+    left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,1,pic.width()*.79,pic.height(),0,1);
+    right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,1,pic.width()*.91,pic.height(),0,1);
     int resized_screenshot_width = pic.width()*.4;
     int resized_screenshot_height = pic.height()*.8;
     left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
