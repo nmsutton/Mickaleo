@@ -80,6 +80,7 @@ int main()
    pic.save_png("blah.png");
 
    printf("%ld %ld %ld\n",red_mask>> 16, green_mask>>8, blue_mask);
+   printf("%d\n",pic.height());
 
     Display                 *display2;
     Visual                  *visual;
@@ -119,7 +120,9 @@ int main()
     //const char* array2;
     CImg<unsigned char> left_eye_display(pic);
     left_eye_display = left_eye_display.get_crop(0,0,0,1,pic.width()*.5,pic.height(),0,1);
-    left_eye_display = left_eye_display.resize(500,500,1,100);
+    int resized_screenshot_width = pic.width()*.4;
+    int resized_screenshot_height = pic.height()*.8;
+    left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
     CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
     //CImgDisplay main_disp(desktop,"Desktop Screenshot");
 
