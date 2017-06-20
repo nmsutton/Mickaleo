@@ -9,6 +9,7 @@ buffered image capture is planned to be streamed.
 References:
 Implemented code based on
 https://stackoverflow.com/questions/8249669/how-do-take-a-screenshot-correctly-with-xlib
+http://www.dreamincode.net/forums/topic/166837-linux-writing-our-first-x-windows-application/
 */
 
 #include <X11/Xlib.h>
