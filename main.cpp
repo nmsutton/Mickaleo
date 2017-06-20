@@ -119,11 +119,16 @@ int main()
 
     //const char* array2;
     CImg<unsigned char> left_eye_display(pic);
+    CImg<unsigned char> right_eye_display(pic);
     left_eye_display = left_eye_display.get_crop(0,0,0,1,pic.width()*.5,pic.height(),0,1);
+    right_eye_display = right_eye_display.get_crop((pic.width()*.5)+1,0,0,1,pic.width(),pic.height(),0,1);
     int resized_screenshot_width = pic.width()*.4;
     int resized_screenshot_height = pic.height()*.8;
     left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-    CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
+    right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
+    CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
+    CImgDisplay main_disp(VR_display,"VR Display");
+    //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
     //CImgDisplay main_disp(desktop,"Desktop Screenshot");
 
     while ( 1 ) {
@@ -141,8 +146,11 @@ int main()
                 text_x = (window_attributes.width - text_structure.width)/2;
                 text_y = (window_attributes.height -
                           (text_structure.ascent+text_structure.descent))/2;
-                XDrawString(display2, frame_window, graphical_context,
-                            text_x, text_y, hello_string, hello_string_length);
+                //XDrawString(display2, frame_window, graphical_context,
+                //            text_x, text_y, hello_string, hello_string_length);
+                //XDrawImage(display2, frame_window, graphical_context,
+                //            text_x, text_y, left_eye_display, hello_string_length);
+                //left_eye_display.draw_image(display2);
 
                 //CImgDisplay main_disp(pic2, array2.c_str() );
                 //CImgDisplay main_disp(pic,"Desktop Screenshot");
