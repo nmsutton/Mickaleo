@@ -1,6 +1,6 @@
-# Mikaleo
+# Mickaleo
 
-This project (code name: Mikaleo) is designed to add at least basic VR to any program on Linux with any VR headset. Eventually it could be a cross platform program to add VR to any program with any headset.
+This project (code name: Mickaleo, pronunciation: mick-ah-leo) is designed to add at least basic VR to any program on Linux with any VR headset. Eventually it could be a cross platform program to add VR to any program with any headset.
 
 ## Deliverables:
 
