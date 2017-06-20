@@ -35,12 +35,14 @@ int main()
    XImage *image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
    unsigned char *array = new unsigned char[width * height * 3];
+   char *array2 = new char[width * height * 3];
 
    unsigned long red_mask = image->red_mask;
    unsigned long green_mask = image->green_mask;
    unsigned long blue_mask = image->blue_mask;
 
    CImg<unsigned char> pic(array,width,height,1,3);
+   CImg<char> pic2(array,width,height,1,3);
 
    for (int x = 0; x < width; x++)
       for (int y = 0; y < height ; y++)
@@ -58,6 +60,20 @@ int main()
          pic(x,y,0) = red;
          pic(x,y,1) = green;
          pic(x,y,2) = blue;
+
+         /*long pixel2 = XGetPixel(image,x,y);
+
+         char blue2 = pixel2 & blue_mask;
+         char green2 = (pixel2 & green_mask) >> 8;
+         char red2 = (pixel2 & red_mask) >> 16;
+
+         array2[(x + width * y) * 3] = red2;
+         array2[(x + width * y) * 3+1] = green2;
+         array2[(x + width * y) * 3+2] = blue2;         
+
+         pic2(x,y,0) = red2;
+         pic2(x,y,1) = green2;
+         pic2(x,y,2) = blue2;  */
       }
 
    //CImg<unsigned char> pic(array,width,height,1,3);
@@ -75,7 +91,7 @@ int main()
     XFontStruct             *fontinfo;
     XGCValues               gr_values;
     GC                      graphical_context;
-    XKeyEvent               event;
+    XEvent               event;
     char                    hello_string[] = "Hello World";
     int                     hello_string_length = strlen(hello_string);
 
@@ -100,6 +116,10 @@ int main()
                                   GCFont+GCForeground, &gr_values);
     XMapWindow(display2, frame_window);
 
+    //const char* array2;
+    CImg<unsigned char> desktop(pic);
+    CImgDisplay main_disp(desktop,"Desktop Screenshot");
+
     while ( 1 ) {
         XNextEvent(display2, (XEvent *)&event);
         switch ( event.type ) {
@@ -117,6 +137,9 @@ int main()
                           (text_structure.ascent+text_structure.descent))/2;
                 XDrawString(display2, frame_window, graphical_context,
                             text_x, text_y, hello_string, hello_string_length);
+
+                //CImgDisplay main_disp(pic2, array2.c_str() );
+                //CImgDisplay main_disp(pic,"Desktop Screenshot");
                 break;
             }
             default:
