@@ -10,6 +10,7 @@ References:
 Implemented code based on
 https://stackoverflow.com/questions/8249669/how-do-take-a-screenshot-correctly-with-xlib
 http://www.dreamincode.net/forums/topic/166837-linux-writing-our-first-x-windows-application/
+https://stackoverflow.com/questions/16887897/overlaying-images-with-cimg
 */
 
 #include <X11/Xlib.h>
@@ -28,9 +29,10 @@ int main()
    XWindowAttributes gwa;
 
    XGetWindowAttributes(display, root, &gwa);
-   int width = gwa.width;
-   int height = gwa.height;
-
+   /*int width = gwa.width;
+   int height = gwa.height;*/
+   int width = 1920;
+   int height = 1080;
 
    XImage *image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
@@ -44,7 +46,8 @@ int main()
    CImg<unsigned char> pic(array,width,height,1,3);
    CImg<char> pic2(array,width,height,1,3);
 
-   for (int x = 0; x < width; x++)
+   for (int x = 0; x < width; x++) 
+   {
       for (int y = 0; y < height ; y++)
       {
          unsigned long pixel = XGetPixel(image,x,y);
@@ -75,6 +78,7 @@ int main()
          pic2(x,y,1) = green2;
          pic2(x,y,2) = blue2;  */
       }
+   }
 
    //CImg<unsigned char> pic(array,width,height,1,3);
    pic.save_png("blah.png");
@@ -131,7 +135,12 @@ int main()
     //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
     //CImgDisplay main_disp(desktop,"Desktop Screenshot");
 
-    while ( 1 ) {
+    while (!main_disp.is_closed() ) {
+      //CImgDisplay main_disp(VR_display,"VR Display");
+      VR_display.display(main_disp);
+    }
+
+    /*while ( 1 ) {
         XNextEvent(display2, (XEvent *)&event);
         switch ( event.type ) {
             case Expose:
@@ -160,7 +169,7 @@ int main()
             default:
                 break;
         }
-    }
+    }*/
 
    return 0;
 }
