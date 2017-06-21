@@ -19,6 +19,10 @@ https://stackoverflow.com/questions/16887897/overlaying-images-with-cimg
 #include <cstdio>
 #include "CImg.h"
 
+// for sleeping
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
+
 using namespace cimg_library;
 
 int main()
@@ -63,28 +67,80 @@ int main()
          pic(x,y,0) = red;
          pic(x,y,1) = green;
          pic(x,y,2) = blue;
-
-         /*long pixel2 = XGetPixel(image,x,y);
-
-         char blue2 = pixel2 & blue_mask;
-         char green2 = (pixel2 & green_mask) >> 8;
-         char red2 = (pixel2 & red_mask) >> 16;
-
-         array2[(x + width * y) * 3] = red2;
-         array2[(x + width * y) * 3+1] = green2;
-         array2[(x + width * y) * 3+2] = blue2;         
-
-         pic2(x,y,0) = red2;
-         pic2(x,y,1) = green2;
-         pic2(x,y,2) = blue2;  */
       }
    }
 
-   //CImg<unsigned char> pic(array,width,height,1,3);
-   pic.save_png("blah.png");
+   //pic.save_png("blah.png");
 
    printf("%ld %ld %ld\n",red_mask>> 16, green_mask>>8, blue_mask);
    printf("%d\n",pic.height());
+
+   //const char* array2;
+   CImg<unsigned char> left_eye_display(pic);
+   CImg<unsigned char> right_eye_display(pic);
+   left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,1,pic.width()*.79,pic.height(),0,1);
+   right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,1,pic.width()*.91,pic.height(),0,1);
+   int resized_screenshot_width = pic.width()*.4;
+   int resized_screenshot_height = pic.height()*.8;
+   left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
+   right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
+   CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
+   CImgDisplay main_disp(VR_display,"VR Display");
+   //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
+   //CImgDisplay main_disp(desktop,"Desktop Screenshot");
+
+   while (!main_disp.is_closed() ) {
+      
+      //sleep
+      std::this_thread::sleep_for (std::chrono::seconds(1));
+
+      XImage *image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
+
+      red_mask = image->red_mask;
+      green_mask = image->green_mask;
+      blue_mask = image->blue_mask;
+
+      CImg<unsigned char> pic(array,width,height,1,3);
+
+      for (int x = 0; x < width; x++) 
+      {
+         for (int y = 0; y < height ; y++)
+         {
+            unsigned long pixel = XGetPixel(image,x,y);
+
+            unsigned char blue = pixel & blue_mask;
+            unsigned char green = (pixel & green_mask) >> 8;
+            unsigned char red = (pixel & red_mask) >> 16;
+
+            array[(x + width * y) * 3] = red;
+            array[(x + width * y) * 3+1] = green;
+            array[(x + width * y) * 3+2] = blue;
+
+            pic(x,y,0) = red;
+            pic(x,y,1) = green;
+            pic(x,y,2) = blue;
+         }
+      }
+
+      CImg<unsigned char> left_eye_display(pic);
+      CImg<unsigned char> right_eye_display(pic);
+      left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,1,pic.width()*.79,pic.height(),0,1);
+      right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,1,pic.width()*.91,pic.height(),0,1);
+      int resized_screenshot_width = pic.width()*.4;
+      int resized_screenshot_height = pic.height()*.8;
+      left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
+      right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
+      CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
+      CImgDisplay main_disp(VR_display,"VR Display");
+
+      VR_display.display(main_disp);
+
+      //pic.save_png("blah.png");
+   }
+
+   /*
+   other window section
+   */
 
     Display                 *display2;
     Visual                  *visual;
@@ -120,25 +176,6 @@ int main()
     graphical_context = XCreateGC(display2, frame_window,
                                   GCFont+GCForeground, &gr_values);
     XMapWindow(display2, frame_window);
-
-    //const char* array2;
-    CImg<unsigned char> left_eye_display(pic);
-    CImg<unsigned char> right_eye_display(pic);
-    left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,1,pic.width()*.79,pic.height(),0,1);
-    right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,1,pic.width()*.91,pic.height(),0,1);
-    int resized_screenshot_width = pic.width()*.4;
-    int resized_screenshot_height = pic.height()*.8;
-    left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-    right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-    CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
-    CImgDisplay main_disp(VR_display,"VR Display");
-    //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
-    //CImgDisplay main_disp(desktop,"Desktop Screenshot");
-
-    while (!main_disp.is_closed() ) {
-      //CImgDisplay main_disp(VR_display,"VR Display");
-      VR_display.display(main_disp);
-    }
 
     /*while ( 1 ) {
         XNextEvent(display2, (XEvent *)&event);
