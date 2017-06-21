@@ -96,7 +96,7 @@ int main()
    while (!main_disp.is_closed() ) {
       
       //sleep
-      std::this_thread::sleep_for (std::chrono::seconds(1));
+      std::this_thread::sleep_for (std::chrono::milliseconds(16));
 
       XImage *image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
@@ -117,9 +117,9 @@ int main()
             unsigned char green = (pixel & green_mask) >> 8;
             unsigned char red = (pixel & red_mask) >> 16;
 
-            array[(x + width * y) * 3] = red;
+            /*array[(x + width * y) * 3] = red;
             array[(x + width * y) * 3+1] = green;
-            array[(x + width * y) * 3+2] = blue;
+            array[(x + width * y) * 3+2] = blue;*/
 
             pic(x,y,0) = red;
             pic(x,y,1) = green;
@@ -137,8 +137,9 @@ int main()
       right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
       //CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
       //CImgDisplay main_disp(VR_display,"VR Display");
+      VR_display.clear();
       VR_display.assign(left_eye_display, right_eye_display);
-      main_disp = VR_display;
+      //main_disp = VR_display;
 
       //cimg_foroff(left_eye_display,0);
       //cimg_foroff(right_eye_display,0);
@@ -151,7 +152,7 @@ int main()
       //   img(x,y,c) = pixel_value_at(x,y,c); 
       //}
       //left_eye_display.display(VR_display);
-      left_eye_display.get_resize(left_eye_display);
+      //left_eye_display.get_resize(left_eye_display);
       VR_display.display(main_disp);
       //VR_display.display();
 
