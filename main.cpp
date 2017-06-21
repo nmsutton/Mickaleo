@@ -132,10 +132,10 @@ int main()
       right_eye_display.clear();
       left_eye_display.assign(pic);
       right_eye_display.assign(pic);
-      left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,1,pic.width()*.79,pic.height(),0,1);
-      right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,1,pic.width()*.91,pic.height(),0,1);
-      left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-      right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
+      left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,0,pic.width()*.79,pic.height(),0,4);
+      right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,0,pic.width()*.91,pic.height(),0,4);
+      left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
+      right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
       VR_display.clear();
       VR_display.assign(left_eye_display, right_eye_display);
       VR_display.display(main_disp);
