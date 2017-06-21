@@ -76,16 +76,20 @@ int main()
    printf("%d\n",pic.height());
 
    //const char* array2;
+   //CImg<unsigned char> left_eye_display(500,500);//(pic);
+   //CImg<unsigned char> right_eye_display(500,500);//(pic);
    CImg<unsigned char> left_eye_display(pic);
    CImg<unsigned char> right_eye_display(pic);
-   left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,1,pic.width()*.79,pic.height(),0,1);
-   right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,1,pic.width()*.91,pic.height(),0,1);
+   left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,0,pic.width()*.79,pic.height(),0,1000);
+   right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,0,pic.width()*.91,pic.height(),0,1000);
    int resized_screenshot_width = pic.width()*.4;
    int resized_screenshot_height = pic.height()*.8;
    left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
    right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
    CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
    CImgDisplay main_disp(VR_display,"VR Display");
+
+
    //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
    //CImgDisplay main_disp(desktop,"Desktop Screenshot");
 
@@ -100,7 +104,8 @@ int main()
       green_mask = image->green_mask;
       blue_mask = image->blue_mask;
 
-      CImg<unsigned char> pic(array,width,height,1,3);
+      //CImg<unsigned char> pic(array,width,height,1,3);
+      //pic(array,width,height,1,3);
 
       for (int x = 0; x < width; x++) 
       {
@@ -130,10 +135,25 @@ int main()
       int resized_screenshot_height = pic.height()*.8;
       left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
       right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-      CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
-      CImgDisplay main_disp(VR_display,"VR Display");
+      //CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
+      //CImgDisplay main_disp(VR_display,"VR Display");
+      VR_display.assign(left_eye_display, right_eye_display);
+      main_disp = VR_display;
 
+      //cimg_foroff(left_eye_display,0);
+      //cimg_foroff(right_eye_display,0);
+      //left_eye_display.fill(0);
+      //right_eye_display.fill(0);
+      //cimg_forC(left_eye_display,1);
+      //cimg_forXY(left_eye_display,1,1);
+      //VR_display.display(main_disp);
+      //cimg_forXYC(img,x,y,c) {  // Do 3 nested loops
+      //   img(x,y,c) = pixel_value_at(x,y,c); 
+      //}
+      //left_eye_display.display(VR_display);
+      left_eye_display.get_resize(left_eye_display);
       VR_display.display(main_disp);
+      //VR_display.display();
 
       //pic.save_png("blah.png");
    }
@@ -201,6 +221,8 @@ int main()
                 //CImgDisplay main_disp(pic2, array2.c_str() );
                 //CImgDisplay main_disp(pic,"Desktop Screenshot");
                 //CImgDisplay main_disp(desktop,"Desktop Screenshot");
+
+
                 break;
             }
             default:
