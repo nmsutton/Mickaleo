@@ -27,6 +27,12 @@ using namespace cimg_library;
 
 int main()
 {
+   unsigned long pixel;
+   unsigned char blue;
+   unsigned char green;
+   unsigned char red;
+   XImage *image;
+
    Display *display = XOpenDisplay(NULL);
    Window root = DefaultRootWindow(display);
 
@@ -38,7 +44,7 @@ int main()
    int width = 1920;
    int height = 1080;
 
-   XImage *image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
+   image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
    unsigned char *array = new unsigned char[width * height * 3];
    char *array2 = new char[width * height * 3];
@@ -54,11 +60,11 @@ int main()
    {
       for (int y = 0; y < height ; y++)
       {
-         unsigned long pixel = XGetPixel(image,x,y);
+         pixel = XGetPixel(image,x,y);
 
-         unsigned char blue = pixel & blue_mask;
-         unsigned char green = (pixel & green_mask) >> 8;
-         unsigned char red = (pixel & red_mask) >> 16;
+         blue = pixel & blue_mask;
+         green = (pixel & green_mask) >> 8;
+         red = (pixel & red_mask) >> 16;
 
          array[(x + width * y) * 3] = red;
          array[(x + width * y) * 3+1] = green;
@@ -98,28 +104,23 @@ int main()
       //sleep
       std::this_thread::sleep_for (std::chrono::milliseconds(16));
 
-      XImage *image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
+      //image->Clear();
+      XDestroyImage(image);
+      image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
       red_mask = image->red_mask;
       green_mask = image->green_mask;
       blue_mask = image->blue_mask;
 
-      //CImg<unsigned char> pic(array,width,height,1,3);
-      //pic(array,width,height,1,3);
-
       for (int x = 0; x < width; x++) 
       {
          for (int y = 0; y < height ; y++)
          {
-            unsigned long pixel = XGetPixel(image,x,y);
+            pixel = XGetPixel(image,x,y);
 
-            unsigned char blue = pixel & blue_mask;
-            unsigned char green = (pixel & green_mask) >> 8;
-            unsigned char red = (pixel & red_mask) >> 16;
-
-            /*array[(x + width * y) * 3] = red;
-            array[(x + width * y) * 3+1] = green;
-            array[(x + width * y) * 3+2] = blue;*/
+            blue = pixel & blue_mask;
+            green = (pixel & green_mask) >> 8;
+            red = (pixel & red_mask) >> 16;
 
             pic(x,y,0) = red;
             pic(x,y,1) = green;
@@ -127,36 +128,17 @@ int main()
          }
       }
 
-      CImg<unsigned char> left_eye_display(pic);
-      CImg<unsigned char> right_eye_display(pic);
+      left_eye_display.clear();
+      right_eye_display.clear();
+      left_eye_display.assign(pic);
+      right_eye_display.assign(pic);
       left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,1,pic.width()*.79,pic.height(),0,1);
       right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,1,pic.width()*.91,pic.height(),0,1);
-      int resized_screenshot_width = pic.width()*.4;
-      int resized_screenshot_height = pic.height()*.8;
       left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
       right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-      //CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
-      //CImgDisplay main_disp(VR_display,"VR Display");
       VR_display.clear();
       VR_display.assign(left_eye_display, right_eye_display);
-      //main_disp = VR_display;
-
-      //cimg_foroff(left_eye_display,0);
-      //cimg_foroff(right_eye_display,0);
-      //left_eye_display.fill(0);
-      //right_eye_display.fill(0);
-      //cimg_forC(left_eye_display,1);
-      //cimg_forXY(left_eye_display,1,1);
-      //VR_display.display(main_disp);
-      //cimg_forXYC(img,x,y,c) {  // Do 3 nested loops
-      //   img(x,y,c) = pixel_value_at(x,y,c); 
-      //}
-      //left_eye_display.display(VR_display);
-      //left_eye_display.get_resize(left_eye_display);
       VR_display.display(main_disp);
-      //VR_display.display();
-
-      //pic.save_png("blah.png");
    }
 
    /*
