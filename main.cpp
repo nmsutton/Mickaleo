@@ -66,9 +66,9 @@ int main()
          green = (pixel & green_mask) >> 8;
          red = (pixel & red_mask) >> 16;
 
-         array[(x + width * y) * 3] = red;
+         /*array[(x + width * y) * 3] = red;
          array[(x + width * y) * 3+1] = green;
-         array[(x + width * y) * 3+2] = blue;
+         array[(x + width * y) * 3+2] = blue;*/
 
          pic(x,y,0) = red;
          pic(x,y,1) = green;
@@ -102,29 +102,48 @@ int main()
    while (!main_disp.is_closed() ) {
       
       //sleep
-      std::this_thread::sleep_for (std::chrono::milliseconds(16));
+      //std::this_thread::sleep_for (std::chrono::milliseconds(16));
+      //std::this_thread::sleep_for (std::chrono::milliseconds(4));
 
       //image->Clear();
       XDestroyImage(image);
       image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
-      red_mask = image->red_mask;
+      /*red_mask = image->red_mask;
       green_mask = image->green_mask;
-      blue_mask = image->blue_mask;
+      blue_mask = image->blue_mask;*/
 
       for (int x = 0; x < width; x++) 
       {
          for (int y = 0; y < height ; y++)
          {
-            pixel = XGetPixel(image,x,y);
-
-            blue = pixel & blue_mask;
-            green = (pixel & green_mask) >> 8;
-            red = (pixel & red_mask) >> 16;
-
-            pic(x,y,0) = red;
-            pic(x,y,1) = green;
-            pic(x,y,2) = blue;
+            if (XGetPixel(image,x,y) != pixel) {
+               pixel = XGetPixel(image,x,y);
+            }
+               if (red != (pixel & red_mask) >> 16) {
+               red = (pixel & red_mask) >> 16;
+               }
+                  if (pic(x,y,0) != red) {
+                  pic(x,y,0) = red;
+                  }
+               //}
+               
+               
+               if (green != (pixel & green_mask) >> 8) {
+               green = (pixel & green_mask) >> 8;
+               }
+                  if (pic(x,y,1) != green) {
+                  pic(x,y,1) = green;
+                  }
+               //}
+                        
+               if (blue != pixel & blue_mask) {
+               blue = pixel & blue_mask;
+               }
+                  if (pic(x,y,2) != blue) {
+                  pic(x,y,2) = blue;
+                  }
+               //} 
          }
       }
 
