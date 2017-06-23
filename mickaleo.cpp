@@ -28,6 +28,54 @@ https://stackoverflow.com/questions/16887897/overlaying-images-with-cimg
 
 using namespace cimg_library;
 
+cairo_surface_t *cairo_create_x11_surface0(int x, int y)
+{
+    Display *dsp;
+    Drawable da;
+    int screen;
+    cairo_surface_t *sfc;
+
+    if ((dsp = XOpenDisplay(NULL)) == NULL)
+        exit(1);
+    screen = DefaultScreen(dsp);
+    da = XCreateSimpleWindow(dsp, DefaultRootWindow(dsp),
+        0, 0, x, y, 0, 0, 0);
+    XSelectInput(dsp, da, ButtonPressMask | KeyPressMask);
+    XMapWindow(dsp, da);
+
+    sfc = cairo_xlib_surface_create(dsp, da,
+        DefaultVisual(dsp, screen), x, y);
+    cairo_xlib_surface_set_size(sfc, x, y);
+
+
+    cairo_surface_t *surface;
+    cairo_t *cr;// = cairo_create(surf);
+    int scr;
+    Display *display = XOpenDisplay(NULL);
+    Window root = DefaultRootWindow(display);
+    scr = DefaultScreen(display);
+    //root = DefaultRootWindow(display);
+    /* get the root surface on given displaylay */
+    surface = cairo_xlib_surface_create(display, root, DefaultVisual(display, scr),
+                                                    DisplayWidth(display, scr), 
+                                                    DisplayHeight(display, scr));
+    cairo_surface_t *image2;
+    image2 = cairo_image_surface_create_from_png ("test.png");
+    //w = cairo_image_surface_get_width (image2);
+    //h = cairo_image_surface_get_height (image2);
+    cairo_set_source_surface (cr, image2, 300, 300);
+    cairo_paint (cr);
+
+    cairo_xlib_surface_set_size(image2,300,300);
+    /* right now, the tool only outputs PNG images */
+    //cairo_surface_write_to_png( surface, "test.png" );
+    
+    /* free the memory*/
+    cairo_surface_destroy(image2);
+
+    return sfc;
+}
+
 int main()
 {
    unsigned long pixel;
@@ -35,6 +83,8 @@ int main()
    unsigned char green;
    unsigned char red;
    XImage *image;
+
+   cairo_create_x11_surface0(400, 400);
 
    Display *display = XOpenDisplay(NULL);
    Window root = DefaultRootWindow(display);
@@ -92,7 +142,7 @@ int main()
    left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
    right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
    CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
-   CImgDisplay main_disp(VR_display,"VR Display");
+   /*CImgDisplay main_disp(VR_display,"VR Display");
 
 
    //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
@@ -108,9 +158,9 @@ int main()
       XDestroyImage(image);
       image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
-      /*red_mask = image->red_mask;
-      green_mask = image->green_mask;
-      blue_mask = image->blue_mask;*/
+      //red_mask = image->red_mask;
+      //green_mask = image->green_mask;
+      //blue_mask = image->blue_mask;
 
       for (int x = 0; x < width; x++) 
       {
@@ -156,8 +206,10 @@ int main()
       right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
       VR_display.clear();
       VR_display.assign(left_eye_display, right_eye_display);
-      VR_display.display(main_disp);
-   }
+      //VR_display.display(main_disp);
+   }*/
+
+
 
    /*
    other window section
@@ -230,6 +282,94 @@ int main()
                 break;
         }
     }*/
+
+    cairo_surface_t *surface;
+    int scr4;
+    scr4 = DefaultScreen(display);
+    //root = DefaultRootWindow(disp);
+    /* get the root surface on given display */
+    surface = cairo_xlib_surface_create(display, root, DefaultVisual(display, scr4),
+                                                    DisplayWidth(display, scr4), 
+                                                    DisplayHeight(display, scr4));
+    /* right now, the tool only outputs PNG images */
+    cairo_surface_write_to_png( surface, "test5.png" );
+    /* free the memory*/
+    //cairo_surface_destroy(surface);
+
+    //cairo_surface_t *surface;
+    //cairo_t *cr2;// = cairo_create(surf);
+    //int scr;
+
+    /* The only checkpoint only concerns about the number of parameters, see "Usage" */
+    /*if( argc != 3) {
+      fprintf(stderr, "Wrong number of parameters given \n");
+      fprintf(stderr, "Usage: ./ahenk_import <display> <output file> \n");
+      return 1;
+    }*/
+    /* try to connect to display, exit if it's NULL */
+    /*disp = XOpenDisplay( argv[1] );
+    if( disp == NULL ){
+      fprintf(stderr, "Given display cannot be found, exiting: %s\n" , argv[1]);
+      return 1;      
+    }*/
+    
+    /*int scr;
+    scr = DefaultScreen(display);
+    surface2 = cairo_xlib_surface_create(display, root, DefaultVisual(display, scr),
+                                                    DisplayWidth(display, scr), 
+                                                    DisplayHeight(display, scr));*/
+    //cairo_set_source_surface (cr2, surface, 0, 0);
+    //cairo_paint (cr2);
+    // right now, the tool only outputs PNG images //
+    //cairo_surface_write_to_png( surface, "test3.png" );
+    // free the memory//
+    //cairo_surface_destroy(surface);
+    int s = DefaultScreen(display);
+    XSelectInput (display, root, SubstructureNotifyMask);
+    width = DisplayWidth(display, s);
+    height = DisplayHeight(display, s);
+    /*cairo_surface_t *surf = cairo_xlib_surface_create(display, root,
+                                  DefaultVisual(display, s),
+                                  width, height);*/
+    cairo_surface_t *surf = cairo_xlib_surface_create(display, root, DefaultVisual(display, s), 300, 300);
+    cairo_t *cr = cairo_create(surf);
+    //XSelectInput(display, root, ExposureMask);
+    //cairo_paint(cr);
+    //int              w, h;
+    //cairo_surface_t *image2;
+    while(1) {
+      cairo_set_source_surface (cr, surf, 0, 0);
+      cairo_paint(cr);
+    }
+
+    /*XEvent ev;
+    while (1) {
+    XNextEvent(display, &ev);
+        if (ev.type == Expose) {
+          //image2 = cairo_image_surface_create_from_png ("test.png");
+          //w = cairo_image_surface_get_width (image2);
+          //h = cairo_image_surface_get_height (image2);
+          //cairo_set_source_surface (cr, image2, 300, 300);
+          //cairo_surface_write_to_png( image2, "test2.png" );
+         cairo_set_source_rgb(cr, 0, 0, 0);
+        //draw some text
+        cairo_select_font_face(cr, "serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+        cairo_set_font_size(cr, 32.0);
+        cairo_set_source_rgb(cr, 0, 0, 1.0);
+        cairo_move_to(cr, 10.0, 25.0);         
+         cairo_show_text(cr, "usage: ./p1 <string>");
+                 cairo_surface_flush(surface);
+        XFlush(display);
+         //cairo_set_source_surface (cr, surface, 0, 0);
+            cairo_paint(cr);
+        }
+    }*/
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surf);
+    cairo_surface_destroy(surface);
+    //cairo_surface_destroy(image2);
+    XCloseDisplay(display);
 
    return 0;
 }
