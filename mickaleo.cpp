@@ -47,6 +47,7 @@ int width, height;
 XImage *image;
 CImgList<unsigned char> VR_display;
 CImgDisplay main_disp;
+std::mutex m;
 
 void provide_pixel(int x, int y) {
   if (XGetPixel(image,x,y) != pixel) {  
@@ -106,7 +107,7 @@ void create_display() {
       VR_display.clear();
       VR_display.assign(left_eye_display, right_eye_display);
       VR_display.display(main_disp);
-      std::cout<<"display called\n";
+      //std::cout<<"display called\n";
   //}
   //std::cout<<y<<"\t"<<(height-1)<<"\n";
   /*if ((y % 400 == 0)) {
@@ -121,10 +122,12 @@ void create_display() {
 void update_display_column(int x) {
    for (int y = 0; y < height ; y++)
    {
+      //m.lock();    
       provide_pixel(x, y);
       provide_red_color(x, y);
       provide_green_color(x, y);
       provide_blue_color(x, y);
+      //m.unlock();
    }
 }
 
@@ -208,12 +211,13 @@ int main()
 
       for (int x = 0; x < width; x++) 
       {
-          threads[x] = std::thread(update_display_column, x);
+          //threads[x] = std::thread(update_display_column, x);
+          update_display_column(x);
       }
 
-      for (int i = 0; i < num_threads; ++i) {
+      /*for (int i = 0; i < num_threads; ++i) {
          threads[i].join();
-      }
+      }*/
 
       create_display();
    }
