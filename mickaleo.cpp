@@ -23,68 +23,118 @@ https://stackoverflow.com/questions/16887897/overlaying-images-with-cimg
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
 
-#include <cairo.h>
-#include <cairo-xlib.h>
+#include <iostream>
+#include <thread>
+#include <mutex>
 
 using namespace cimg_library;
 
-cairo_surface_t *cairo_create_x11_surface0(int x, int y)
-{
-    Display *dsp;
-    Drawable da;
-    int screen;
-    cairo_surface_t *sfc;
+static std::mutex theLock;
 
-    if ((dsp = XOpenDisplay(NULL)) == NULL)
-        exit(1);
-    screen = DefaultScreen(dsp);
-    da = XCreateSimpleWindow(dsp, DefaultRootWindow(dsp),
-        0, 0, x, y, 0, 0, 0);
-    XSelectInput(dsp, da, ButtonPressMask | KeyPressMask);
-    XMapWindow(dsp, da);
+unsigned long pixel;
+unsigned char blue;
+unsigned char green;
+unsigned char red;
+unsigned long red_mask;
+unsigned long green_mask;
+unsigned long blue_mask;
+CImg<unsigned char> pic;
+CImg<unsigned char> left_eye_display;
+CImg<unsigned char> right_eye_display;
+//int x, y;
+int resized_screenshot_width, resized_screenshot_height;
+int width, height;
+XImage *image;
+CImgList<unsigned char> VR_display;
+CImgDisplay main_disp;
 
-    sfc = cairo_xlib_surface_create(dsp, da,
-        DefaultVisual(dsp, screen), x, y);
-    cairo_xlib_surface_set_size(sfc, x, y);
+void provide_pixel(int x, int y) {
+  if (XGetPixel(image,x,y) != pixel) {  
+    //std::lock_guard<std::mutex> lock(theLock);
+    pixel = XGetPixel(image,x,y);
+  }
+  //std::cout << "Launched by thread 0\n";
+}
 
+void provide_red_color(int x, int y) {
+  if (red != (pixel & red_mask) >> 16) {
+    //std::lock_guard<std::mutex> lock(theLock);
+    red = (pixel & red_mask) >> 16;
+  }
 
-    cairo_surface_t *surface;
-    cairo_t *cr;// = cairo_create(surf);
-    int scr;
-    Display *display = XOpenDisplay(NULL);
-    Window root = DefaultRootWindow(display);
-    scr = DefaultScreen(display);
-    //root = DefaultRootWindow(display);
-    /* get the root surface on given displaylay */
-    surface = cairo_xlib_surface_create(display, root, DefaultVisual(display, scr),
-                                                    DisplayWidth(display, scr), 
-                                                    DisplayHeight(display, scr));
-    cairo_surface_t *image2;
-    image2 = cairo_image_surface_create_from_png ("test.png");
-    //w = cairo_image_surface_get_width (image2);
-    //h = cairo_image_surface_get_height (image2);
-    cairo_set_source_surface (cr, image2, 300, 300);
-    cairo_paint (cr);
+  if (pic(x,y,0) != red) {
+    pic(x,y,0) = red;
+  }
+  //std::cout << "Launched by thread 1\n";
+}
 
-    cairo_xlib_surface_set_size(image2,300,300);
-    /* right now, the tool only outputs PNG images */
-    //cairo_surface_write_to_png( surface, "test.png" );
-    
-    /* free the memory*/
-    cairo_surface_destroy(image2);
+void provide_green_color(int x, int y) {
+  if (green != (pixel & green_mask) >> 8) {
+    //std::lock_guard<std::mutex> lock(theLock);
+    green = (pixel & green_mask) >> 8;
+  }
 
-    return sfc;
+  if (pic(x,y,1) != green) {
+    pic(x,y,1) = green;
+  }
+  //std::cout << "Launched by thread 2\n";
+}
+
+void provide_blue_color(int x, int y) {
+  if (blue != pixel & blue_mask) {
+    //std::lock_guard<std::mutex> lock(theLock);
+    blue = pixel & blue_mask;
+  }
+
+  if (pic(x,y,2) != blue) {
+    pic(x,y,2) = blue;
+  }
+  //std::cout << "Launched by thread 3\n";
+}
+
+void create_display() {
+  //if (x == (width - 1) & y == (height - 1)) {
+    //std::lock_guard<std::mutex> lock(theLock);
+      left_eye_display.clear();
+      right_eye_display.clear();
+      left_eye_display.assign(pic);
+      right_eye_display.assign(pic);
+      left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,0,pic.width()*.79,pic.height(),0,4);
+      right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,0,pic.width()*.91,pic.height(),0,4);
+      left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
+      right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
+      VR_display.clear();
+      VR_display.assign(left_eye_display, right_eye_display);
+      VR_display.display(main_disp);
+      std::cout<<"display called\n";
+  //}
+  //std::cout<<y<<"\t"<<(height-1)<<"\n";
+  /*if ((y % 400 == 0)) {
+  std::cout<<"height"<<"\t"<<y<<"\t"<<(height-1)<<"\n";
+  }
+  if ((x % 400 == 0)) {
+  std::cout<<"width"<<"\t"<<x<<"\t"<<(width-1)<<"\n";
+  }*/
+  //std::cout<<"display called\n";
+}
+
+void update_display_column(int x) {
+   for (int y = 0; y < height ; y++)
+   {
+      provide_pixel(x, y);
+      provide_red_color(x, y);
+      provide_green_color(x, y);
+      provide_blue_color(x, y);
+   }
+}
+
+void call_from_thread(int tid) {
+  //std::lock_guard<std::mutex> lock(theLock);
+   std::cout << "Launched by thread " << tid << std::endl;
 }
 
 int main()
 {
-   unsigned long pixel;
-   unsigned char blue;
-   unsigned char green;
-   unsigned char red;
-   XImage *image;
-
-   cairo_create_x11_surface0(400, 400);
 
    Display *display = XOpenDisplay(NULL);
    Window root = DefaultRootWindow(display);
@@ -94,20 +144,23 @@ int main()
    XGetWindowAttributes(display, root, &gwa);
    /*int width = gwa.width;
    int height = gwa.height;*/
-   int width = 1920;
-   int height = 1080;
+   width = 1920;
+   height = 1080;
+
+   static const int num_threads = width;//4;
+   std::thread threads[num_threads];
 
    image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
    unsigned char *array = new unsigned char[width * height * 3];
-   char *array2 = new char[width * height * 3];
+   //char *array2 = new char[width * height * 3];
 
-   unsigned long red_mask = image->red_mask;
-   unsigned long green_mask = image->green_mask;
-   unsigned long blue_mask = image->blue_mask;
+   red_mask = image->red_mask;
+   green_mask = image->green_mask;
+   blue_mask = image->blue_mask;
 
-   CImg<unsigned char> pic(array,width,height,1,3);
-   CImg<char> pic2(array,width,height,1,3);
+   pic.assign(array,width,height,1,3);
+   //CImg<char> pic2(array,width,height,1,3);
 
    for (int x = 0; x < width; x++) 
    {
@@ -133,83 +186,37 @@ int main()
    //const char* array2;
    //CImg<unsigned char> left_eye_display(500,500);//(pic);
    //CImg<unsigned char> right_eye_display(500,500);//(pic);
-   CImg<unsigned char> left_eye_display(pic);
-   CImg<unsigned char> right_eye_display(pic);
+   left_eye_display.assign(pic);
+   right_eye_display.assign(pic);
    left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,0,pic.width()*.79,pic.height(),0,1000);
    right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,0,pic.width()*.91,pic.height(),0,1000);
-   int resized_screenshot_width = pic.width()*.4;
-   int resized_screenshot_height = pic.height()*.8;
+   resized_screenshot_width = pic.width()*.4;
+   resized_screenshot_height = pic.height()*.8;
    left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
    right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-   CImgList<unsigned char> VR_display(left_eye_display, right_eye_display);
-   /*CImgDisplay main_disp(VR_display,"VR Display");
+   VR_display.assign(left_eye_display, right_eye_display);
+   main_disp.assign(VR_display,"VR Display");
 
 
    //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
    //CImgDisplay main_disp(desktop,"Desktop Screenshot");
 
    while (!main_disp.is_closed() ) {
-      
-      //sleep
-      //std::this_thread::sleep_for (std::chrono::milliseconds(16));
-      //std::this_thread::sleep_for (std::chrono::milliseconds(4));
 
-      //image->Clear();
       XDestroyImage(image);
       image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
 
-      //red_mask = image->red_mask;
-      //green_mask = image->green_mask;
-      //blue_mask = image->blue_mask;
-
       for (int x = 0; x < width; x++) 
       {
-         for (int y = 0; y < height ; y++)
-         {
-            if (XGetPixel(image,x,y) != pixel) {
-               pixel = XGetPixel(image,x,y);
-            }
-               if (red != (pixel & red_mask) >> 16) {
-               red = (pixel & red_mask) >> 16;
-               }
-                  if (pic(x,y,0) != red) {
-                  pic(x,y,0) = red;
-                  }
-               //}
-               
-               
-               if (green != (pixel & green_mask) >> 8) {
-               green = (pixel & green_mask) >> 8;
-               }
-                  if (pic(x,y,1) != green) {
-                  pic(x,y,1) = green;
-                  }
-               //}
-                        
-               if (blue != pixel & blue_mask) {
-               blue = pixel & blue_mask;
-               }
-                  if (pic(x,y,2) != blue) {
-                  pic(x,y,2) = blue;
-                  }
-               //} 
-         }
+          threads[x] = std::thread(update_display_column, x);
       }
 
-      left_eye_display.clear();
-      right_eye_display.clear();
-      left_eye_display.assign(pic);
-      right_eye_display.assign(pic);
-      left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,0,pic.width()*.79,pic.height(),0,4);
-      right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,0,pic.width()*.91,pic.height(),0,4);
-      left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
-      right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
-      VR_display.clear();
-      VR_display.assign(left_eye_display, right_eye_display);
-      //VR_display.display(main_disp);
-   }*/
+      for (int i = 0; i < num_threads; ++i) {
+         threads[i].join();
+      }
 
-
+      create_display();
+   }
 
    /*
    other window section
@@ -282,94 +289,6 @@ int main()
                 break;
         }
     }*/
-
-    cairo_surface_t *surface;
-    int scr4;
-    scr4 = DefaultScreen(display);
-    //root = DefaultRootWindow(disp);
-    /* get the root surface on given display */
-    surface = cairo_xlib_surface_create(display, root, DefaultVisual(display, scr4),
-                                                    DisplayWidth(display, scr4), 
-                                                    DisplayHeight(display, scr4));
-    /* right now, the tool only outputs PNG images */
-    cairo_surface_write_to_png( surface, "test5.png" );
-    /* free the memory*/
-    //cairo_surface_destroy(surface);
-
-    //cairo_surface_t *surface;
-    //cairo_t *cr2;// = cairo_create(surf);
-    //int scr;
-
-    /* The only checkpoint only concerns about the number of parameters, see "Usage" */
-    /*if( argc != 3) {
-      fprintf(stderr, "Wrong number of parameters given \n");
-      fprintf(stderr, "Usage: ./ahenk_import <display> <output file> \n");
-      return 1;
-    }*/
-    /* try to connect to display, exit if it's NULL */
-    /*disp = XOpenDisplay( argv[1] );
-    if( disp == NULL ){
-      fprintf(stderr, "Given display cannot be found, exiting: %s\n" , argv[1]);
-      return 1;      
-    }*/
-    
-    /*int scr;
-    scr = DefaultScreen(display);
-    surface2 = cairo_xlib_surface_create(display, root, DefaultVisual(display, scr),
-                                                    DisplayWidth(display, scr), 
-                                                    DisplayHeight(display, scr));*/
-    //cairo_set_source_surface (cr2, surface, 0, 0);
-    //cairo_paint (cr2);
-    // right now, the tool only outputs PNG images //
-    //cairo_surface_write_to_png( surface, "test3.png" );
-    // free the memory//
-    //cairo_surface_destroy(surface);
-    int s = DefaultScreen(display);
-    XSelectInput (display, root, SubstructureNotifyMask);
-    width = DisplayWidth(display, s);
-    height = DisplayHeight(display, s);
-    /*cairo_surface_t *surf = cairo_xlib_surface_create(display, root,
-                                  DefaultVisual(display, s),
-                                  width, height);*/
-    cairo_surface_t *surf = cairo_xlib_surface_create(display, root, DefaultVisual(display, s), 300, 300);
-    cairo_t *cr = cairo_create(surf);
-    //XSelectInput(display, root, ExposureMask);
-    //cairo_paint(cr);
-    //int              w, h;
-    //cairo_surface_t *image2;
-    while(1) {
-      cairo_set_source_surface (cr, surf, 0, 0);
-      cairo_paint(cr);
-    }
-
-    /*XEvent ev;
-    while (1) {
-    XNextEvent(display, &ev);
-        if (ev.type == Expose) {
-          //image2 = cairo_image_surface_create_from_png ("test.png");
-          //w = cairo_image_surface_get_width (image2);
-          //h = cairo_image_surface_get_height (image2);
-          //cairo_set_source_surface (cr, image2, 300, 300);
-          //cairo_surface_write_to_png( image2, "test2.png" );
-         cairo_set_source_rgb(cr, 0, 0, 0);
-        //draw some text
-        cairo_select_font_face(cr, "serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-        cairo_set_font_size(cr, 32.0);
-        cairo_set_source_rgb(cr, 0, 0, 1.0);
-        cairo_move_to(cr, 10.0, 25.0);         
-         cairo_show_text(cr, "usage: ./p1 <string>");
-                 cairo_surface_flush(surface);
-        XFlush(display);
-         //cairo_set_source_surface (cr, surface, 0, 0);
-            cairo_paint(cr);
-        }
-    }*/
-
-    cairo_destroy(cr);
-    cairo_surface_destroy(surf);
-    cairo_surface_destroy(surface);
-    //cairo_surface_destroy(image2);
-    XCloseDisplay(display);
 
    return 0;
 }
