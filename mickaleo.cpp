@@ -51,17 +51,20 @@ int main(){
     cv::Mat right_eye;
     cv::Size left_eye_size = left_eye.size();
     cv::Size right_eye_size = right_eye.size();    
-    left_eye_size.height = 500;
-    left_eye_size.width = 700;
-    right_eye_size.height = 500;
-    right_eye_size.width = 700;
-    cv::Mat vr_display(left_eye_size.height, left_eye_size.width + right_eye_size.width, CV_8UC4);
-    double scaling_factor = .8;
-    int left_eye_width_offset = (WIDTH*.1);
-    int left_eye_height_offset = (HEIGHT*.2);
-    int right_eye_width_offset = (WIDTH*.3);
-    int right_eye_height_offset = (HEIGHT*.2);
-    cv::Rect left_eye_region(left_eye_width_offset, left_eye_height_offset, left_eye_size.width,left_eye_size.height);
+    left_eye_size.height = HEIGHT;
+    left_eye_size.width = WIDTH*.45;
+    right_eye_size.height = HEIGHT;
+    right_eye_size.width = WIDTH*.45;
+    //cv::Mat vr_display(left_eye_size.height, left_eye_size.width + right_eye_size.width, CV_8UC4);
+    cv::Mat vr_display(HEIGHT, WIDTH, CV_8UC4);
+    double scaling_factor = 1.0;//.9; // resize
+    int left_eye_width_offset = (WIDTH*.17); // shift
+    int left_eye_height_offset = 0;//(HEIGHT*.1);
+    int right_eye_width_offset = (WIDTH*.33);
+    int right_eye_height_offset = 0;//(HEIGHT*.1);
+    int width_border_offset = (WIDTH*0.05); // shift
+    int height_border_offset = 0;//(HEIGHT*0.06); 
+    cv::Rect left_eye_region(left_eye_width_offset, left_eye_height_offset, left_eye_size.width,left_eye_size.height); //crop
     cv::Rect right_eye_region(right_eye_width_offset, right_eye_height_offset, right_eye_size.width,right_eye_size.height);
     //vr_display.height = left_eye_size.height;
     //vr_display.width = left_eye_size.width + right_eye_size.width;
@@ -96,9 +99,13 @@ int main(){
     right_eye.copyTo(right);*/
     left_eye = screenstream_resized(left_eye_region);
     right_eye = screenstream_resized(right_eye_region);
-    left_eye.copyTo(vr_display(cv::Rect(0, 0, left_eye_size.width, left_eye_size.height)));
-    right_eye.copyTo(vr_display(cv::Rect(left_eye_size.width, 0, right_eye_size.width, right_eye_size.height)));
-    cv::imshow("img", vr_display);
+    left_eye.copyTo(vr_display(cv::Rect(width_border_offset, height_border_offset, left_eye_size.width, left_eye_size.height)));
+    right_eye.copyTo(vr_display(cv::Rect(width_border_offset+left_eye_size.width, height_border_offset, right_eye_size.width, right_eye_size.height)));
+    //resize(vr_display, vr_display, Size(1920, 1080));
+    cvNamedWindow("VR Display", WINDOW_NORMAL);
+    cvSetWindowProperty("VR Display", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+    cv::imshow("VR Display", vr_display);
+    //cvShowImage("VR Display", vr_display);
     cv::waitKey(1);
     }
 

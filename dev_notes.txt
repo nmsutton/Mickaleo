@@ -2,3 +2,6 @@
 If a display on one monitor was streamed to a second monitor, the 
 second monitor could have the left/right eye display adjustements 
 made. the 2cnd monitor could then be streamed to the headset.
+06/23/17
+in gnome shell ubuntu alt+right click on the program's image
+allows moving program image to right monitor through a popup menu
