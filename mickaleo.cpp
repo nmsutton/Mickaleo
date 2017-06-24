@@ -57,6 +57,12 @@ int main(){
     right_eye_size.width = 700;
     cv::Mat vr_display(left_eye_size.height, left_eye_size.width + right_eye_size.width, CV_8UC4);
     double scaling_factor = .8;
+    int left_eye_width_offset = (WIDTH*.1);
+    int left_eye_height_offset = (HEIGHT*.2);
+    int right_eye_width_offset = (WIDTH*.3);
+    int right_eye_height_offset = (HEIGHT*.2);
+    cv::Rect left_eye_region(left_eye_width_offset, left_eye_height_offset, left_eye_size.width,left_eye_size.height);
+    cv::Rect right_eye_region(right_eye_width_offset, right_eye_height_offset, right_eye_size.width,right_eye_size.height);
     //vr_display.height = left_eye_size.height;
     //vr_display.width = left_eye_size.width + right_eye_size.width;
 
@@ -77,9 +83,9 @@ int main(){
     img = cv::Mat(HEIGHT, WIDTH, CV_8UC4, ximg->data);
     //r = 100.0 / image.shape[1]
     //dim = (100, int(image.shape[0] * r))
-    //cv::resize(img, screenstream_resized, cv::Size(1366, 786), 0, 0, cv::INTER_AREA);
-    cv::resize(img, left_eye, cv::Size(700, 500), 0, 0, cv::INTER_AREA);
-    cv::resize(img, right_eye, cv::Size(700, 500), 0, 0, cv::INTER_AREA);
+    cv::resize(img, screenstream_resized, cv::Size(WIDTH*scaling_factor, HEIGHT*scaling_factor), 0, 0, cv::INTER_AREA);
+    //cv::resize(img, left_eye, cv::Size(700, 500), 0, 0, cv::INTER_AREA);
+    //cv::resize(img, right_eye, cv::Size(700, 500), 0, 0, cv::INTER_AREA);
     //cv::resize(img, left_eye, cv::Size(WIDTH*scaling_factor, HEIGHT*scaling_factor), 0, 0, cv::INTER_AREA);
     //cv::resize(img, right_eye, cv::Size(WIDTH*scaling_factor, HEIGHT*scaling_factor), 0, 0, cv::INTER_AREA);
     //left_eye = cv::cvCreateImage();
@@ -88,6 +94,8 @@ int main(){
     left_eye.copyTo(left);
     cv::Mat right(vr_display, cv::Rect(left_eye_size.width, 0, right_eye_size.width, right_eye_size.height));
     right_eye.copyTo(right);*/
+    left_eye = screenstream_resized(left_eye_region);
+    right_eye = screenstream_resized(right_eye_region);
     left_eye.copyTo(vr_display(cv::Rect(0, 0, left_eye_size.width, left_eye_size.height)));
     right_eye.copyTo(vr_display(cv::Rect(left_eye_size.width, 0, right_eye_size.width, right_eye_size.height)));
     cv::imshow("img", vr_display);
