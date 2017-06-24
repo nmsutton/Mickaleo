@@ -1,298 +1,102 @@
 /*
-Author: Nate Sutton
-Copyright: 2017
-
-This is code which captures the current display image to
-reformat it in left and right eye image streams.  A
-buffered image capture is planned to be streamed.
+Author: Nate Sutton, 2017
 
 References:
-Implemented code based on
-https://stackoverflow.com/questions/8249669/how-do-take-a-screenshot-correctly-with-xlib
-http://www.dreamincode.net/forums/topic/166837-linux-writing-our-first-x-windows-application/
-https://stackoverflow.com/questions/16887897/overlaying-images-with-cimg
+https://stackoverflow.com/questions/24988164/c-fast-screenshots-in-linux-for-use-with-opencv
+https://stackoverflow.com/questions/13133055/opencv-displaying-2-images-adjacently-in-the-same-window
 */
 
+// g++ xshm2.c -o xshm2 -lX11 -lXext `$cv`-Ofast -mfpmath=both -march=native -m64 -funroll-loops -mavx2 && ./xshm2
+
 #include <X11/Xlib.h>
-#include <X11/X.h>
+#include <X11/Xutil.h>
 
-#include <cstdio>
-#include "CImg.h"
+#include <X11/extensions/XShm.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
-// for sleeping
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>         // std::chrono::seconds
+#include <opencv2/opencv.hpp>  // This includes most headers!
+//#include <highgui.h>
 
-#include <iostream>
-#include <thread>
-#include <mutex>
+#include <time.h>
+#define FPS(start) (CLOCKS_PER_SEC / (clock()-start))
 
-using namespace cimg_library;
+using namespace cv;
 
-static std::mutex theLock;
+// Using one monitor DOESN'T improve performance! Querying a smaller subset of the screen DOES
+const uint WIDTH  = 1920>>0;
+const uint HEIGHT = 1080>>0;
 
-unsigned long pixel;
-unsigned char blue;
-unsigned char green;
-unsigned char red;
-unsigned long red_mask;
-unsigned long green_mask;
-unsigned long blue_mask;
-CImg<unsigned char> pic;
-CImg<unsigned char> left_eye_display;
-CImg<unsigned char> right_eye_display;
-//int x, y;
-int resized_screenshot_width, resized_screenshot_height;
-int width, height;
-XImage *image;
-CImgList<unsigned char> VR_display;
-CImgDisplay main_disp;
-std::mutex m;
+// -------------------------------------------------------
+int main(){
+    Display* display = XOpenDisplay(NULL);
+    Window root = DefaultRootWindow(display);  // Macro to return the root window! It's a simple uint32
+    XWindowAttributes window_attributes;
+    XGetWindowAttributes(display, root, &window_attributes);
+    Screen* screen = window_attributes.screen;
+    XShmSegmentInfo shminfo;
+    XImage* ximg = XShmCreateImage(display, DefaultVisualOfScreen(screen), DefaultDepthOfScreen(screen), ZPixmap, NULL, &shminfo, WIDTH, HEIGHT);
 
-void provide_pixel(int x, int y) {
-  if (XGetPixel(image,x,y) != pixel) {  
-    //std::lock_guard<std::mutex> lock(theLock);
-    pixel = XGetPixel(image,x,y);
-  }
-  //std::cout << "Launched by thread 0\n";
-}
+    shminfo.shmid = shmget(IPC_PRIVATE, ximg->bytes_per_line * ximg->height, IPC_CREAT|0777);
+    shminfo.shmaddr = ximg->data = (char*)shmat(shminfo.shmid, 0, 0);
+    shminfo.readOnly = False;
+    if(shminfo.shmid < 0)
+        puts("Fatal shminfo error!");;
+    Status s1 = XShmAttach(display, &shminfo);
+    printf("XShmAttach() %s\n", s1 ? "success!" : "failure!");
 
-void provide_red_color(int x, int y) {
-  if (red != (pixel & red_mask) >> 16) {
-    //std::lock_guard<std::mutex> lock(theLock);
-    red = (pixel & red_mask) >> 16;
-  }
+    cv::Mat img;
+    cv::Mat screenstream_resized;
+    cv::Mat left_eye;
+    cv::Mat right_eye;
+    cv::Size left_eye_size = left_eye.size();
+    cv::Size right_eye_size = right_eye.size();    
+    left_eye_size.height = 500;
+    left_eye_size.width = 700;
+    right_eye_size.height = 500;
+    right_eye_size.width = 700;
+    cv::Mat vr_display(left_eye_size.height, left_eye_size.width + right_eye_size.width, CV_8UC4);
+    double scaling_factor = .8;
+    //vr_display.height = left_eye_size.height;
+    //vr_display.width = left_eye_size.width + right_eye_size.width;
 
-  if (pic(x,y,0) != red) {
-    pic(x,y,0) = red;
-  }
-  //std::cout << "Launched by thread 1\n";
-}
+    /*for(int i; ; i++){
+        double start = clock();
 
-void provide_green_color(int x, int y) {
-  if (green != (pixel & green_mask) >> 8) {
-    //std::lock_guard<std::mutex> lock(theLock);
-    green = (pixel & green_mask) >> 8;
-  }
+        XShmGetImage(display, root, ximg, 0, 0, 0x00ffffff);
+        img = cv::Mat(HEIGHT, WIDTH, CV_8UC4, ximg->data);
+        cv::imshow("img", img);
 
-  if (pic(x,y,1) != green) {
-    pic(x,y,1) = green;
-  }
-  //std::cout << "Launched by thread 2\n";
-}
-
-void provide_blue_color(int x, int y) {
-  if (blue != pixel & blue_mask) {
-    //std::lock_guard<std::mutex> lock(theLock);
-    blue = pixel & blue_mask;
-  }
-
-  if (pic(x,y,2) != blue) {
-    pic(x,y,2) = blue;
-  }
-  //std::cout << "Launched by thread 3\n";
-}
-
-void create_display() {
-  //if (x == (width - 1) & y == (height - 1)) {
-    //std::lock_guard<std::mutex> lock(theLock);
-      left_eye_display.clear();
-      right_eye_display.clear();
-      left_eye_display.assign(pic);
-      right_eye_display.assign(pic);
-      left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,0,pic.width()*.79,pic.height(),0,4);
-      right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,0,pic.width()*.91,pic.height(),0,4);
-      left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
-      right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,4);
-      VR_display.clear();
-      VR_display.assign(left_eye_display, right_eye_display);
-      VR_display.display(main_disp);
-      //std::cout<<"display called\n";
-  //}
-  //std::cout<<y<<"\t"<<(height-1)<<"\n";
-  /*if ((y % 400 == 0)) {
-  std::cout<<"height"<<"\t"<<y<<"\t"<<(height-1)<<"\n";
-  }
-  if ((x % 400 == 0)) {
-  std::cout<<"width"<<"\t"<<x<<"\t"<<(width-1)<<"\n";
-  }*/
-  //std::cout<<"display called\n";
-}
-
-void update_display_column(int x) {
-   for (int y = 0; y < height ; y++)
-   {
-      //m.lock();    
-      provide_pixel(x, y);
-      provide_red_color(x, y);
-      provide_green_color(x, y);
-      provide_blue_color(x, y);
-      //m.unlock();
-   }
-}
-
-void call_from_thread(int tid) {
-  //std::lock_guard<std::mutex> lock(theLock);
-   std::cout << "Launched by thread " << tid << std::endl;
-}
-
-int main()
-{
-
-   Display *display = XOpenDisplay(NULL);
-   Window root = DefaultRootWindow(display);
-
-   XWindowAttributes gwa;
-
-   XGetWindowAttributes(display, root, &gwa);
-   /*int width = gwa.width;
-   int height = gwa.height;*/
-   width = 1920;
-   height = 1080;
-
-   static const int num_threads = width;//4;
-   std::thread threads[num_threads];
-
-   image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
-
-   unsigned char *array = new unsigned char[width * height * 3];
-   //char *array2 = new char[width * height * 3];
-
-   red_mask = image->red_mask;
-   green_mask = image->green_mask;
-   blue_mask = image->blue_mask;
-
-   pic.assign(array,width,height,1,3);
-   //CImg<char> pic2(array,width,height,1,3);
-
-   for (int x = 0; x < width; x++) 
-   {
-      for (int y = 0; y < height ; y++)
-      {
-         pixel = XGetPixel(image,x,y);
-
-         blue = pixel & blue_mask;
-         green = (pixel & green_mask) >> 8;
-         red = (pixel & red_mask) >> 16;
-
-         pic(x,y,0) = red;
-         pic(x,y,1) = green;
-         pic(x,y,2) = blue;
-      }
-   }
-
-   //pic.save_png("blah.png");
-
-   printf("%ld %ld %ld\n",red_mask>> 16, green_mask>>8, blue_mask);
-   printf("%d\n",pic.height());
-
-   //const char* array2;
-   //CImg<unsigned char> left_eye_display(500,500);//(pic);
-   //CImg<unsigned char> right_eye_display(500,500);//(pic);
-   left_eye_display.assign(pic);
-   right_eye_display.assign(pic);
-   left_eye_display = left_eye_display.get_crop((pic.width()*.5)*.29,0,0,0,pic.width()*.79,pic.height(),0,1000);
-   right_eye_display = right_eye_display.get_crop((pic.width()*.5)*.41+1,0,0,0,pic.width()*.91,pic.height(),0,1000);
-   resized_screenshot_width = pic.width()*.4;
-   resized_screenshot_height = pic.height()*.8;
-   left_eye_display = left_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-   right_eye_display = right_eye_display.resize(resized_screenshot_width,resized_screenshot_height,1,1);
-   VR_display.assign(left_eye_display, right_eye_display);
-   main_disp.assign(VR_display,"VR Display");
-
-
-   //CImgDisplay main_disp(left_eye_display,"Desktop Screenshot");
-   //CImgDisplay main_disp(desktop,"Desktop Screenshot");
-
-   while (!main_disp.is_closed() ) {
-
-      XDestroyImage(image);
-      image = XGetImage(display,root, 0,0 , width,height,AllPlanes, ZPixmap);
-
-      for (int x = 0; x < width; x++) 
-      {
-          //threads[x] = std::thread(update_display_column, x);
-          update_display_column(x);
-      }
-
-      /*for (int i = 0; i < num_threads; ++i) {
-         threads[i].join();
-      }*/
-
-      create_display();
-   }
-
-   /*
-   other window section
-   */
-
-    Display                 *display2;
-    Visual                  *visual;
-    int                     depth;
-    int                     text_x;
-    int                     text_y;
-    XSetWindowAttributes    frame_attributes;
-    Window                  frame_window;
-    XFontStruct             *fontinfo;
-    XGCValues               gr_values;
-    GC                      graphical_context;
-    XEvent               event;
-    char                    hello_string[] = "Hello World";
-    int                     hello_string_length = strlen(hello_string);
-
-    display2 = XOpenDisplay(NULL);
-    visual = DefaultVisual(display2, 0);
-    depth  = DefaultDepth(display2, 0);
-
-    frame_attributes.background_pixel = XWhitePixel(display2, 0);
-
-    /* create the application window */
-    frame_window = XCreateWindow(display2, XRootWindow(display2, 0),
-                                 0, 0, 400, 400, 5, depth,
-                                 InputOutput, visual, CWBackPixel,
-                                 &frame_attributes);
-    XStoreName(display2, frame_window, "Hello World Example");
-
-    XSelectInput(display2, frame_window, ExposureMask | StructureNotifyMask);
-    fontinfo = XLoadQueryFont(display2, "10x20");
-    gr_values.font = fontinfo->fid;
-    gr_values.foreground = XBlackPixel(display2, 0);
-    graphical_context = XCreateGC(display2, frame_window,
-                                  GCFont+GCForeground, &gr_values);
-    XMapWindow(display2, frame_window);
-
-    /*while ( 1 ) {
-        XNextEvent(display2, (XEvent *)&event);
-        switch ( event.type ) {
-            case Expose:
-            {
-                XWindowAttributes window_attributes;
-                int font_direction, font_ascent, font_descent;
-                XCharStruct text_structure;
-                XTextExtents(fontinfo, hello_string, hello_string_length,
-                             &font_direction, &font_ascent, &font_descent,
-                             &text_structure);
-                XGetWindowAttributes(display2, frame_window, &window_attributes);
-                text_x = (window_attributes.width - text_structure.width)/2;
-                text_y = (window_attributes.height -
-                          (text_structure.ascent+text_structure.descent))/2;
-                //XDrawString(display2, frame_window, graphical_context,
-                //            text_x, text_y, hello_string, hello_string_length);
-                //XDrawImage(display2, frame_window, graphical_context,
-                //            text_x, text_y, left_eye_display, hello_string_length);
-                //left_eye_display.draw_image(display2);
-
-                //CImgDisplay main_disp(pic2, array2.c_str() );
-                //CImgDisplay main_disp(pic,"Desktop Screenshot");
-                //CImgDisplay main_disp(desktop,"Desktop Screenshot");
-
-
-                break;
-            }
-            default:
-                break;
-        }
+        //if(!(i & 0b111111))
+        //    printf("fps %4.f  spf %.4f\n", FPS(start), 1 / FPS(start));
+        //break;
     }*/
 
-   return 0;
+    while(1) {
+    XShmGetImage(display, root, ximg, 0, 0, 0x00ffffff);
+    img = cv::Mat(HEIGHT, WIDTH, CV_8UC4, ximg->data);
+    //r = 100.0 / image.shape[1]
+    //dim = (100, int(image.shape[0] * r))
+    //cv::resize(img, screenstream_resized, cv::Size(1366, 786), 0, 0, cv::INTER_AREA);
+    cv::resize(img, left_eye, cv::Size(700, 500), 0, 0, cv::INTER_AREA);
+    cv::resize(img, right_eye, cv::Size(700, 500), 0, 0, cv::INTER_AREA);
+    //cv::resize(img, left_eye, cv::Size(WIDTH*scaling_factor, HEIGHT*scaling_factor), 0, 0, cv::INTER_AREA);
+    //cv::resize(img, right_eye, cv::Size(WIDTH*scaling_factor, HEIGHT*scaling_factor), 0, 0, cv::INTER_AREA);
+    //left_eye = cv::cvCreateImage();
+    //Mat im3(sz1.height, sz1.width+sz2.width, CV_8UC3);
+    /*cv::Mat left(vr_display, cv::Rect(0, 0, left_eye_size.width, left_eye_size.height));
+    left_eye.copyTo(left);
+    cv::Mat right(vr_display, cv::Rect(left_eye_size.width, 0, right_eye_size.width, right_eye_size.height));
+    right_eye.copyTo(right);*/
+    left_eye.copyTo(vr_display(cv::Rect(0, 0, left_eye_size.width, left_eye_size.height)));
+    right_eye.copyTo(vr_display(cv::Rect(left_eye_size.width, 0, right_eye_size.width, right_eye_size.height)));
+    cv::imshow("img", vr_display);
+    cv::waitKey(1);
+    }
+
+    XShmDetach(display, &shminfo);
+    XDestroyImage(ximg);
+    shmdt(shminfo.shmaddr);
+    XCloseDisplay(display);
+    puts("Exit success!");
 }
