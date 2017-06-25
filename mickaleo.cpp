@@ -58,9 +58,9 @@ int main(){
     //cv::Mat vr_display(left_eye_size.height, left_eye_size.width + right_eye_size.width, CV_8UC4);
     cv::Mat vr_display(HEIGHT, WIDTH, CV_8UC4);
     double scaling_factor = 1.0;//.9; // resize
-    int left_eye_width_offset = (WIDTH*.17); // shift
+    int left_eye_width_offset = (WIDTH*.16); // shift
     int left_eye_height_offset = 0;//(HEIGHT*.1);
-    int right_eye_width_offset = (WIDTH*.33);
+    int right_eye_width_offset = (WIDTH*.34);
     int right_eye_height_offset = 0;//(HEIGHT*.1);
     int width_border_offset = (WIDTH*0.05); // shift
     int height_border_offset = 0;//(HEIGHT*0.06); 
