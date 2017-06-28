@@ -28,14 +28,16 @@ public class mouse_controller {
 		// TODO Auto-generated method stub
 		System.out.print("hello world\n\n");
 		
+		Robot robot;
 		try {
 		    // These coordinates are screen coordinates
 		    int xCoord = 500;
 		    int yCoord = 500;
 
 		    // Move the cursor
-		    Robot robot = new Robot();
-		    robot.mouseMove(xCoord, yCoord);
+			
+		    robot = new Robot();
+		    //robot.mouseMove(xCoord, yCoord);
 		} catch (AWTException e) {
 		}
 		
@@ -54,6 +56,8 @@ public class mouse_controller {
 		    dataOutputStream = new DataOutputStream(socket.getOutputStream());
 		    System.out.println("ip: " + socket.getInetAddress());
 		    System.out.println("message: " + dataInputStream.readUTF());
+		    //robot = new Robot();
+		    //robot.mouseMove(xCoord, yCoord);
 		    dataOutputStream.writeUTF("Hello!");
 		   } catch (IOException e) {
 		    // TODO Auto-generated catch block
@@ -87,6 +91,17 @@ public class mouse_controller {
 		     }
 		    }
 		   }
+		   
+			/*try {
+			    // These coordinates are screen coordinates
+			    int xCoord = 500;
+			    int yCoord = 500;
+
+			    // Move the cursor
+			    robot = new Robot();
+			    robot.mouseMove(xCoord, yCoord);
+			} catch (AWTException e) {
+			}*/
 		  }
 	}
 
