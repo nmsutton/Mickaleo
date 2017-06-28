@@ -1,5 +1,5 @@
 {
-	"cmd": ["g++ -std=c++11 $file_name -o ${file_base_name} -lX11 -lpthread && ./${file_base_name}"],
+	"cmd": ["g++ -std=c++11 $file_name -o ${file_base_name} -lX11 -lXext -Ofast -mfpmath=both -march=native -m64 -funroll-loops -mavx2 `pkg-config --libs --cflags opencv` && ./${file_base_name}"],
 	"shell": true,
 	"working_dir":"$file_path"
 }
