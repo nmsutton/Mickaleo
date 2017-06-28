@@ -74,17 +74,19 @@ public class position_tracker extends Activity implements SensorEventListener {
         magneticField = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         rate = SensorManager.SENSOR_DELAY_GAME;
 
-        view = findViewById(R.id.textView);
-        view.setBackgroundColor(Color.GREEN);
+        /*view = findViewById(R.id.textView);
+        view.setBackgroundColor(Color.GREEN);*/
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         lastUpdate = System.currentTimeMillis();
 
         //String textOut2 = "test1";
-        textOut = (EditText)findViewById(R.id.textout);
-        Button buttonSend = (Button)findViewById(R.id.send);
+        //textOut = (EditText)findViewById(R.id.textout);
         textIn = (TextView)findViewById(R.id.textin);
-        buttonSend.setOnClickListener(buttonSendOnClickListener);
+        Button button_enable = (Button)findViewById(R.id.button_enable);
+        button_enable.setOnClickListener(buttonEnableOnClickListener);
+        Button button_disable = (Button)findViewById(R.id.button_disable);
+        button_disable.setOnClickListener(buttonDisableOnClickListener);
 
         //new MyTask().execute();
 
@@ -106,38 +108,11 @@ public class position_tracker extends Activity implements SensorEventListener {
 
     private float[] getAccelerometer(SensorEvent event) {
         float[] values = event.values;
-        // Movement
-        /*float x = values[0];
-        float y = values[1];
-        float z = values[2];*/
-
-        /*float accelationSquareRoot = (x * x + y * y + z * z)
-                / (SensorManager.GRAVITY_EARTH * SensorManager.GRAVITY_EARTH);
-        long actualTime = event.timestamp;
-        if (accelationSquareRoot >= 2) //
-        {
-            if (actualTime - lastUpdate < 200) {
-                return;
-            }
-            lastUpdate = actualTime;
-            Toast.makeText(this, "Device was shuffed", Toast.LENGTH_SHORT)
-                    .show();
-            if (color) {
-                view.setBackgroundColor(Color.GREEN);
-            } else {
-                view.setBackgroundColor(Color.RED);
-            }
-            color = !color;
-        }*/
         return values;
     }
 
     private float[] getMagneticField(SensorEvent event) {
         float[] values = event.values;
-        // Movement
-        /*float x = values[0];
-        float y = values[1];
-        float z = values[2];*/
         return values;
     }
 
@@ -146,6 +121,7 @@ public class position_tracker extends Activity implements SensorEventListener {
 
     }
 
+    /*
     @Override
     protected void onResume() {
         super.onResume();
@@ -167,15 +143,45 @@ public class position_tracker extends Activity implements SensorEventListener {
         sensorManager.unregisterListener(this);
         //mSensorManager.registerListener(sensorListener, magneticField, rate);
     }
+    */
 
-    Button.OnClickListener buttonSendOnClickListener
+    void enable_movement_tracking() {
+        super.onResume();
+        // register this class as a listener for the orientation and
+        // accelerometer sensors
+        sensorManager.registerListener(this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    void disable_movement_tracking() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
+    }
+
+    Button.OnClickListener buttonEnableOnClickListener
             = new Button.OnClickListener(){
 
     @Override
     public void onClick(View arg0) {
-        float[] empty;
-        new MyTask().execute();
+            //float[] empty;
+            //new MyTask().execute();
+        enable_movement_tracking();
     }};
+
+    Button.OnClickListener buttonDisableOnClickListener
+            = new Button.OnClickListener(){
+
+        @Override
+        public void onClick(View arg0) {
+            //float[] empty;
+            //new MyTask().execute();
+            disable_movement_tracking();
+        }};
+
 
     private class MyTask extends AsyncTask<Void, Void, Void>{
 
@@ -183,32 +189,6 @@ public class position_tracker extends Activity implements SensorEventListener {
 
         @Override
         protected Void doInBackground(Void... params) {
-
-            /*URL textUrl;
-
-            try {
-                textUrl = new URL("http://sites.google.com/site/androidersite/text.txt");
-
-                BufferedReader bufferReader
-                        = new BufferedReader(new InputStreamReader(textUrl.openStream()));
-
-                String StringBuffer;
-                String stringText = "";
-                while ((StringBuffer = bufferReader.readLine()) != null) {
-                    stringText += StringBuffer;
-                }
-                bufferReader.close();
-
-                textResult = stringText;
-            } catch (MalformedURLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                textResult = e.toString();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                textResult = e.toString();
-            }*/
 
             // TODO Auto-generated method stub
             Socket socket = null;
@@ -219,8 +199,8 @@ public class position_tracker extends Activity implements SensorEventListener {
                 socket = new Socket("10.0.0.150", 8888);
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
-                dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2]));
-                //textIn.setText(dataInputStream.readUTF());
+                dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2])+"\ty-position:\t"+(1920*(accelerometer_values[2]+9.81)/19.62)+"\tx-position:\t"+(1080*(1-((magnetic_field_values[1]+45)/90))));
+                //dataOutputStream.writeUTF(String.valueOf("\n "));
             } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

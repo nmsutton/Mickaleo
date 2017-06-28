@@ -2,31 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/textout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        />
-    <Button
-        android:id="@+id/send"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Send"
-        />
     <TextView
         android:id="@+id/textin"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:text="Track movements for computer mouse"
         />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Shake to get a toast and to switch color" />
-
-
+    <Button
+        android:id="@+id/button_enable"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Enable"
+        />
+    <Button
+        android:id="@+id/button_disable"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Disable"
+        />
 
 </LinearLayout>
