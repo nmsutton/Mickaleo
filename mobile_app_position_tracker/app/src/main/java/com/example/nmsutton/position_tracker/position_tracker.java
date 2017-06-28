@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 //import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
 import android.os.Bundle;
 //import android.widget.TextView;
 import android.app.Activity;
@@ -39,6 +40,11 @@ public class position_tracker extends Activity implements SensorEventListener {
 
     EditText textOut;
     TextView textIn;
+    float[] accelerometer_values = new float[3];
+    float[] magnetic_field_values = new float[3];
+    private SensorManager mSensorManager;
+    private Sensor magneticField;
+    private int rate;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -63,6 +69,11 @@ public class position_tracker extends Activity implements SensorEventListener {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);*/
 
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        magneticField = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        rate = SensorManager.SENSOR_DELAY_GAME;
+
         view = findViewById(R.id.textView);
         view.setBackgroundColor(Color.GREEN);
 
@@ -81,20 +92,26 @@ public class position_tracker extends Activity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            getAccelerometer(event);
-        }
 
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            accelerometer_values = getAccelerometer(event);
+            //magnetic_field_values = getMagneticField(event);
+            new MyTask().execute();
+        }
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            magnetic_field_values = getMagneticField(event);
+            new MyTask().execute();
+        }
     }
 
-    private void getAccelerometer(SensorEvent event) {
+    private float[] getAccelerometer(SensorEvent event) {
         float[] values = event.values;
         // Movement
-        float x = values[0];
+        /*float x = values[0];
         float y = values[1];
-        float z = values[2];
+        float z = values[2];*/
 
-        float accelationSquareRoot = (x * x + y * y + z * z)
+        /*float accelationSquareRoot = (x * x + y * y + z * z)
                 / (SensorManager.GRAVITY_EARTH * SensorManager.GRAVITY_EARTH);
         long actualTime = event.timestamp;
         if (accelationSquareRoot >= 2) //
@@ -111,7 +128,17 @@ public class position_tracker extends Activity implements SensorEventListener {
                 view.setBackgroundColor(Color.RED);
             }
             color = !color;
-        }
+        }*/
+        return values;
+    }
+
+    private float[] getMagneticField(SensorEvent event) {
+        float[] values = event.values;
+        // Movement
+        /*float x = values[0];
+        float y = values[1];
+        float z = values[2];*/
+        return values;
     }
 
     @Override
@@ -127,6 +154,10 @@ public class position_tracker extends Activity implements SensorEventListener {
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        //mSensorManager.registerListener(sensorListener, magneticField, rate);
     }
 
     @Override
@@ -134,6 +165,7 @@ public class position_tracker extends Activity implements SensorEventListener {
         // unregister listener
         super.onPause();
         sensorManager.unregisterListener(this);
+        //mSensorManager.registerListener(sensorListener, magneticField, rate);
     }
 
     Button.OnClickListener buttonSendOnClickListener
@@ -141,61 +173,10 @@ public class position_tracker extends Activity implements SensorEventListener {
 
     @Override
     public void onClick(View arg0) {
+        float[] empty;
         new MyTask().execute();
     }};
 
-    /*private class MyTask extends AsyncTask<Void, Void, Void> {
-
-        //String textResult;
-
-        protected Void doInBackground(EditText textOut, TextView textIn) {
-            // TODO Auto-generated method stub
-            Socket socket = null;
-            DataOutputStream dataOutputStream = null;
-            DataInputStream dataInputStream = null;
-
-            try {
-                socket = new Socket("10.0.0.1", 8888);
-                dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                dataInputStream = new DataInputStream(socket.getInputStream());
-                dataOutputStream.writeUTF(textOut.getText().toString());
-                textIn.setText(dataInputStream.readUTF());
-            } catch (UnknownHostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } finally {
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-
-                if (dataOutputStream != null) {
-                    try {
-                        dataOutputStream.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-
-                if (dataInputStream != null) {
-                    try {
-                        dataInputStream.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }*/
     private class MyTask extends AsyncTask<Void, Void, Void>{
 
         String textResult;
@@ -203,7 +184,7 @@ public class position_tracker extends Activity implements SensorEventListener {
         @Override
         protected Void doInBackground(Void... params) {
 
-            URL textUrl;
+            /*URL textUrl;
 
             try {
                 textUrl = new URL("http://sites.google.com/site/androidersite/text.txt");
@@ -227,7 +208,7 @@ public class position_tracker extends Activity implements SensorEventListener {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 textResult = e.toString();
-            }
+            }*/
 
             // TODO Auto-generated method stub
             Socket socket = null;
@@ -238,7 +219,7 @@ public class position_tracker extends Activity implements SensorEventListener {
                 socket = new Socket("10.0.0.150", 8888);
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
-                dataOutputStream.writeUTF("test2");
+                dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2]));
                 //textIn.setText(dataInputStream.readUTF());
             } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
