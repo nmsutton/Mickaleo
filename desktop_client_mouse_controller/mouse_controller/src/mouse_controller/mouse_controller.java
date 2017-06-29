@@ -31,6 +31,10 @@ public class mouse_controller {
 			float accel_x, accel_y, accel_z;
 			float magnet_x, magnet_y, magnet_z = 0;
 			float mouse_x, mouse_y;
+			float x_tracking_scaling = 0.0F;
+			float x_tracking_offset = 3F, y_tracking_offset = -4F;			
+			float mouse_x_scaling = 0.30F, mouse_y_scaling = 0.30F;
+			float mouse_x_offset = 800F, mouse_y_offset = 400F;
 		
 		// TODO Auto-generated method stub
 		System.out.print("hello world\n\n");
@@ -84,17 +88,18 @@ public class mouse_controller {
 		    //magnet_x = Float.valueOf(is.readLine().replace('!', '+'));
 		    //magnet_y = Float.valueOf(is.readLine().replace('!', '+'));
 		    //magnet_z = Float.valueOf(is.readLine().replace('!', '+'));
-		    mouse_x = ((float)1080)*(1-((magnet_y+((float)45))/((float)90)));
-		    mouse_y = ((float)1920)*((accel_z+((float)9.81))/((float)19.62));
+		    x_tracking_scaling = (14F / 45F)*.75F;
+		    mouse_x = mouse_x_offset+(1080F*(mouse_x_scaling*(1-((x_tracking_offset+magnet_y+(x_tracking_scaling*45F))/(x_tracking_scaling*90F)))));
+		    mouse_y = mouse_y_offset+(1920F*(mouse_y_scaling*(y_tracking_offset+accel_z+9.81F)/19.62F));
 		    
-		    if (mouse_x > 1079) {
-		    	mouse_x = 1079;
+		    if (mouse_x > 1919) {
+		    	mouse_x = 1919;
 		    }
 		    if (mouse_x < 1) {
 		    	mouse_x = 1;
 		    }
-		    if (mouse_y > 1919) {
-		    	mouse_y = 1919;
+		    if (mouse_y > 1079) {
+		    	mouse_y = 1079;
 		    }
 		    if (mouse_y < 1) {
 		    	mouse_y = 1;
