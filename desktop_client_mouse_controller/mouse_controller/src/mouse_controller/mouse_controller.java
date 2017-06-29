@@ -65,26 +65,27 @@ public class mouse_controller {
 		    System.out.println("ip: " + socket.getInetAddress());
 		    //System.out.println("message: " + dataInputStream.readUTF());
 		    accel_x_str = is.readLine(); 
-		    accel_x = Float.valueOf(accel_x_str.split("\\.")[0].replaceAll("[^0-9]", "")+"."+accel_x_str.split("\\.")[1].replaceAll("[^0-9]", ""));//is.readLine();//Float.valueOf(is.readLine().replaceAll("[^0-9.]", ""));//.replace('!', '+').replace(')', '+').replace('/', '+').replace('(', '+'));
+		    //System.out.println(accel_x_str);
+		    accel_x = Float.valueOf(accel_x_str.split("\\.")[0].replaceAll("[^0-9-]", "")+"."+accel_x_str.split("\\.")[1].replaceAll("[^0-9]", ""));//is.readLine();//Float.valueOf(is.readLine().replaceAll("[^0-9.]", ""));//.replace('!', '+').replace(')', '+').replace('/', '+').replace('(', '+'));
 		    accel_y_str = is.readLine(); 
-		    accel_y = Float.valueOf(accel_y_str.split("\\.")[0].replaceAll("[^0-9]", "")+"."+accel_y_str.split("\\.")[1].replaceAll("[^0-9]", ""));		    accel_z = Float.valueOf(is.readLine().replace('!', '+'));
+		    accel_y = Float.valueOf(accel_y_str.split("\\.")[0].replaceAll("[^0-9]-", "")+"."+accel_y_str.split("\\.")[1].replaceAll("[^0-9]", ""));//		    accel_z = Float.valueOf(is.readLine().replace('!', '+'));
 		    accel_z_str = is.readLine(); 
-		    accel_z = Float.valueOf(accel_z_str.split("\\.")[0].replaceAll("[^0-9]", "")+"."+accel_z_str.split("\\.")[1].replaceAll("[^0-9]", ""));
+		    //System.out.println(accel_z_str);		    
+		    accel_z = Float.valueOf(accel_z_str.split("\\.")[0].replaceAll("[^0-9]-", "")+"."+accel_z_str.split("\\.")[1].replaceAll("[^0-9]", ""));
 		    magnet_x_str = is.readLine(); 
-		    magnet_x = Float.valueOf(magnet_x_str.split("\\.")[0].replaceAll("[^0-9]", "")+"."+magnet_x_str.split("\\.")[1].replaceAll("[^0-9]", ""));
+		    magnet_x = Float.valueOf(magnet_x_str.split("\\.")[0].replaceAll("[^0-9]-", "")+"."+magnet_x_str.split("\\.")[1].replaceAll("[^0-9]", ""));
 		    magnet_y_str = is.readLine(); 
-		    magnet_y = Float.valueOf(magnet_y_str.split("\\.")[0].replaceAll("[^0-9]", "")+"."+magnet_y_str.split("\\.")[1].replaceAll("[^0-9]", ""));
+		    magnet_y = Float.valueOf(magnet_y_str.split("\\.")[0].replaceAll("[^0-9]-", "")+"."+magnet_y_str.split("\\.")[1].replaceAll("[^0-9]", ""));
 		    magnet_z_str = is.readLine();
 		    //if (magnet_z_str != null) {} else { 
 		    if (magnet_z_str != null && magnet_z_str.split("\\.")[0] != (null) && magnet_z_str.split("\\.")[1] != (null)) {
-		    magnet_z = Float.valueOf(magnet_z_str.split("\\.")[0].replaceAll("[^0-9]", "")+"."+magnet_z_str.split("\\.")[1].replaceAll("[^0-9]", ""));
+		    magnet_z = Float.valueOf(magnet_z_str.split("\\.")[0].replaceAll("[^0-9]-", "")+"."+magnet_z_str.split("\\.")[1].replaceAll("[^0-9]", ""));
 		    }
 		    //magnet_x = Float.valueOf(is.readLine().replace('!', '+'));
 		    //magnet_y = Float.valueOf(is.readLine().replace('!', '+'));
 		    //magnet_z = Float.valueOf(is.readLine().replace('!', '+'));
-		    mouse_x = 1080*(1-((magnet_y+45)/90));
-		    mouse_y = ((float) 1920)*(accel_z+((float) 9.81))/((float)19.62);
-		    System.out.println(accel_x+"\t"+accel_y+"\t"+accel_z+"\t"+magnet_x+"\t"+magnet_y+"\t"+magnet_z+"\t"+mouse_x+"\t"+mouse_y);
+		    mouse_x = ((float)1080)*(1-((magnet_y+((float)45))/((float)90)));
+		    mouse_y = ((float)1920)*((accel_z+((float)9.81))/((float)19.62));
 		    
 		    if (mouse_x > 1079) {
 		    	mouse_x = 1079;
@@ -98,9 +99,11 @@ public class mouse_controller {
 		    if (mouse_y < 1) {
 		    	mouse_y = 1;
 		    }
+		    System.out.println(accel_x+"\t"+accel_y+"\t"+accel_z+"\t"+magnet_x+"\t"+magnet_y+"\t"+magnet_z+"\tx:\t"+mouse_x+"\ty:\t"+mouse_y);		    
 		    
 		    robot = new Robot();
 		    robot.mouseMove((int) mouse_x, (int) mouse_y);
+		    
 		    dataOutputStream.writeUTF("Hello!");
 		   } catch (IOException e) {
 		    // TODO Auto-generated catch block
