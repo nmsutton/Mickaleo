@@ -45,6 +45,7 @@ public class position_tracker extends Activity implements SensorEventListener {
     private SensorManager mSensorManager;
     private Sensor magneticField;
     private int rate;
+    private String transmission_values_text;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -199,7 +200,14 @@ public class position_tracker extends Activity implements SensorEventListener {
                 socket = new Socket("10.0.0.150", 8888);
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
-                dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2])+"\ty-position:\t"+(1920*(accelerometer_values[2]+9.81)/19.62)+"\tx-position:\t"+(1080*(1-((magnetic_field_values[1]+45)/90))));
+                transmission_values_text = String.valueOf(accelerometer_values[0])+"\n"
+                        + String.valueOf(accelerometer_values[1])+"\n"
+                        + String.valueOf(accelerometer_values[2])+"\n"
+                        + String.valueOf(magnetic_field_values[0])+"\n"
+                        + String.valueOf(magnetic_field_values[1])+"\n"
+                        + String.valueOf(magnetic_field_values[2]);
+                dataOutputStream.writeUTF(transmission_values_text);
+                //dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2])+"\ty-position:\t"+(1920*(accelerometer_values[2]+9.81)/19.62)+"\tx-position:\t"+(1080*(1-((magnetic_field_values[1]+45)/90))));
                 //dataOutputStream.writeUTF(String.valueOf("\n "));
             } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
