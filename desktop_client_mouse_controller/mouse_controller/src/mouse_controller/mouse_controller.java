@@ -33,8 +33,9 @@ public class mouse_controller {
 			float mouse_x, mouse_y;
 			float x_tracking_scaling = 0.0F;
 			float x_tracking_offset = 3F, y_tracking_offset = -4F;			
-			float mouse_x_scaling = 0.30F, mouse_y_scaling = 0.30F;
-			float mouse_x_offset = 800F, mouse_y_offset = 400F;
+			float mouse_x_scaling = 0.025F, mouse_y_scaling = 0.025F;
+			float mouse_x_offset = 932F, mouse_y_offset = 533F;
+			Boolean logging_active = false;
 		
 		// TODO Auto-generated method stub
 		System.out.print("hello world\n\n");
@@ -66,7 +67,9 @@ public class mouse_controller {
 		    dataInputStream = new DataInputStream(socket.getInputStream());
 		    is = new BufferedReader(new InputStreamReader(dataInputStream));
 		    dataOutputStream = new DataOutputStream(socket.getOutputStream());
+		    if (logging_active) {
 		    System.out.println("ip: " + socket.getInetAddress());
+		    }
 		    //System.out.println("message: " + dataInputStream.readUTF());
 		    accel_x_str = is.readLine(); 
 		    //System.out.println(accel_x_str);
@@ -100,11 +103,14 @@ public class mouse_controller {
 		    }
 		    if (mouse_y > 1079) {
 		    	mouse_y = 1079;
+		    	
 		    }
 		    if (mouse_y < 1) {
 		    	mouse_y = 1;
 		    }
+		    if (logging_active) {
 		    System.out.println(accel_x+"\t"+accel_y+"\t"+accel_z+"\t"+magnet_x+"\t"+magnet_y+"\t"+magnet_z+"\tx:\t"+mouse_x+"\ty:\t"+mouse_y);		    
+		    }
 		    
 		    robot = new Robot();
 		    robot.mouseMove((int) mouse_x, (int) mouse_y);
