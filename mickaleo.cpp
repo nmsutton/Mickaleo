@@ -21,6 +21,14 @@ https://stackoverflow.com/questions/13133055/opencv-displaying-2-images-adjacent
 #include <time.h>
 #define FPS(start) (CLOCKS_PER_SEC / (clock()-start))
 
+#include <stdio.h>
+#include <string.h>    //strlen
+#include <string>
+#include <cstring>
+#include <sys/socket.h>
+#include <arpa/inet.h> //inet_addr
+#include <unistd.h>    //write
+
 using namespace cv;
 
 // Using one monitor DOESN'T improve performance! Querying a smaller subset of the screen DOES
@@ -29,6 +37,42 @@ const uint HEIGHT = 1080>>0;
 
 // -------------------------------------------------------
 int main(){
+    int socket_desc;
+    struct sockaddr_in server;
+    std::string message_string;
+    char *message;
+     
+    //Create socket
+    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    if (socket_desc == -1)
+    {
+        printf("Could not create socket");
+    }
+         
+    server.sin_addr.s_addr = inet_addr("10.0.0.139");
+    server.sin_family = AF_INET;
+    server.sin_port = htons( 8888 );
+ 
+    //Connect to remote server
+    if (connect(socket_desc , (struct sockaddr *)&server , sizeof(server)) < 0)
+    {
+        puts("connect error");
+        return 1;
+    }
+     
+    puts("Connected\n");
+     
+    //Send some data
+    message_string = "GET / HTTP/1.1\r\n\r\n";
+    message = new char[message_string.size() + 1];
+    memcpy(message, message_string.c_str(), message_string.size() + 1);
+    if( send(socket_desc , message , strlen(message) , 0) < 0)
+    {
+        puts("Send failed");
+        return 1;
+    }
+    puts("Data Send\n");
+
     Display* display = XOpenDisplay(NULL);
     Window root = DefaultRootWindow(display);  // Macro to return the root window! It's a simple uint32
     XWindowAttributes window_attributes;
@@ -81,6 +125,8 @@ int main(){
         //break;
     }*/
 
+    /**************
+
     while(1) {
     XShmGetImage(display, root, ximg, 0, 0, 0x00ffffff);
     img = cv::Mat(HEIGHT, WIDTH, CV_8UC4, ximg->data);
@@ -93,25 +139,28 @@ int main(){
     //cv::resize(img, right_eye, cv::Size(WIDTH*scaling_factor, HEIGHT*scaling_factor), 0, 0, cv::INTER_AREA);
     //left_eye = cv::cvCreateImage();
     //Mat im3(sz1.height, sz1.width+sz2.width, CV_8UC3);
-    /*cv::Mat left(vr_display, cv::Rect(0, 0, left_eye_size.width, left_eye_size.height));
-    left_eye.copyTo(left);
-    cv::Mat right(vr_display, cv::Rect(left_eye_size.width, 0, right_eye_size.width, right_eye_size.height));
-    right_eye.copyTo(right);*/
+    //cv::Mat left(vr_display, cv::Rect(0, 0, left_eye_size.width, left_eye_size.height));
+    //left_eye.copyTo(left);
+    //cv::Mat right(vr_display, cv::Rect(left_eye_size.width, 0, right_eye_size.width, right_eye_size.height));
+    //right_eye.copyTo(right);
     left_eye = screenstream_resized(left_eye_region);
     right_eye = screenstream_resized(right_eye_region);
     left_eye.copyTo(vr_display(cv::Rect(width_border_offset, height_border_offset, left_eye_size.width, left_eye_size.height)));
     right_eye.copyTo(vr_display(cv::Rect(width_border_offset+left_eye_size.width, height_border_offset, right_eye_size.width, right_eye_size.height)));
     //resize(vr_display, vr_display, Size(1920, 1080));
+    
     cvNamedWindow("VR Display", WINDOW_NORMAL);
     cvSetWindowProperty("VR Display", CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
     cv::imshow("VR Display", vr_display);
     //cvShowImage("VR Display", vr_display);
     cv::waitKey(1);
     }
+    ***********************/    
 
     XShmDetach(display, &shminfo);
     XDestroyImage(ximg);
     shmdt(shminfo.shmaddr);
     XCloseDisplay(display);
     puts("Exit success!");
+
 }

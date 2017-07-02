@@ -1,0 +1,41 @@
+15:35:54 **** Build of configuration Debug for project Mickaleo ****
+make all 
+Building file: ../src/mickaleo.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/mickaleo.d" -MT"src/mickaleo.o" -o "src/mickaleo.o" "../src/mickaleo.cpp"
+Finished building: ../src/mickaleo.cpp
+ 
+Building target: Mickaleo
+Invoking: GCC C++ Linker
+g++  -o "Mickaleo"  ./src/mickaleo.o   
+./src/mickaleo.o: In function `main':
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:34: undefined reference to `XOpenDisplay'
+makefile:45: recipe for target 'Mickaleo' failed
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:37: undefined reference to `XGetWindowAttributes'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:40: undefined reference to `XShmCreateImage'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:47: undefined reference to `XShmAttach'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:87: undefined reference to `XShmGetImage'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:91: undefined reference to `cv::_OutputArray::_OutputArray(cv::Mat&)'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:91: undefined reference to `cv::_InputArray::_InputArray(cv::Mat const&)'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:91: undefined reference to `cv::resize(cv::_InputArray const&, cv::_OutputArray const&, cv::Size_<int>, double, double, int)'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:104: undefined reference to `cv::_OutputArray::_OutputArray(cv::Mat const&)'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:104: undefined reference to `cv::Mat::copyTo(cv::_OutputArray const&) const'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:105: undefined reference to `cv::_OutputArray::_OutputArray(cv::Mat const&)'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:105: undefined reference to `cv::Mat::copyTo(cv::_OutputArray const&) const'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:107: undefined reference to `cvNamedWindow'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:108: undefined reference to `cvSetWindowProperty'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:109: undefined reference to `cv::_InputArray::_InputArray(cv::Mat const&)'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:109: undefined reference to `cv::imshow(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, cv::_InputArray const&)'
+/CompNeuro/Software/Mickaleo/Mickaleo/Debug/../src/mickaleo.cpp:111: undefined reference to `cv::waitKey(int)'
+./src/mickaleo.o: In function `cv::Mat::~Mat()':
+/usr/include/opencv2/core/mat.hpp:278: undefined reference to `cv::fastFree(void*)'
+./src/mickaleo.o: In function `cv::Mat::operator=(cv::Mat const&)':
+/usr/include/opencv2/core/mat.hpp:298: undefined reference to `cv::Mat::copySize(cv::Mat const&)'
+./src/mickaleo.o: In function `cv::Mat::create(int, int, int)':
+/usr/include/opencv2/core/mat.hpp:353: undefined reference to `cv::Mat::create(int, int const*, int)'
+./src/mickaleo.o: In function `cv::Mat::release()':
+/usr/include/opencv2/core/mat.hpp:367: undefined reference to `cv::Mat::deallocate()'
+./src/mickaleo.o: In function `cv::Mat::operator()(cv::Rect_<int> const&) const':
+/usr/include/opencv2/core/mat.hpp:379: undefined reference to `cv::Mat::Mat(cv::Mat const&, cv::Rect_<int> const&)'
+collect2: error: ld returned 1 exit status
+make: *** [Mickaleo] Error 1
