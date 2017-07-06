@@ -23,5 +23,18 @@
         android:layout_height="wrap_content"
         android:text="Disable"
         />
+    <Button
+        android:id="@+id/button_receive_data"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Receive data through socket"
+        />
+    <TextView
+        android:id="@+id/socket_data"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Socket data displayed here"
+        />
 
 </LinearLayout>

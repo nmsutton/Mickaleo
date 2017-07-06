@@ -1,7 +1,7 @@
 package com.herokuapp.nmsutton.mickaleoapp2;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+//import android.support.v7.app.AppCompatActivity;
+//import android.os.Bundle;
 import android.util.Log;
 
 import org.opencv.android.OpenCVLoader;
@@ -62,8 +62,9 @@ public class MickaleoApp extends Activity implements SensorEventListener {
         setContentView(R.layout.activity_mickaleo_app);
     }*/
 
-    EditText textOut;
+    //EditText textOut;
     TextView textIn;
+    TextView socket_data;
     float[] accelerometer_values = new float[3];
     float[] magnetic_field_values = new float[3];
     private SensorManager mSensorManager;
@@ -80,6 +81,8 @@ public class MickaleoApp extends Activity implements SensorEventListener {
     private boolean color = false;
     private View view;
     private long lastUpdate;
+    BufferedReader is = null;
+    String data_transmitted = "";
 
     /** Called when the activity is first created. */
     @Override
@@ -108,6 +111,7 @@ public class MickaleoApp extends Activity implements SensorEventListener {
         //String textOut2 = "test1";
         //textOut = (EditText)findViewById(R.id.textout);
         textIn = (TextView)findViewById(R.id.textin);
+        socket_data = (TextView)findViewById(R.id.socket_data);
         Button button_enable = (Button)findViewById(R.id.button_enable);
         button_enable.setOnClickListener(buttonEnableOnClickListener);
         Button button_disable = (Button)findViewById(R.id.button_disable);
@@ -220,8 +224,16 @@ public class MickaleoApp extends Activity implements SensorEventListener {
             DataOutputStream dataOutputStream = null;
             DataInputStream dataInputStream = null;
 
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    socket_data.setText(data_transmitted);
+                }
+            });
+
             try {
-                socket = new Socket("10.0.0.150", 8888);
+                data_transmitted = "loading data";
+                socket = new Socket("10.0.0.150", 5001);
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
                 transmission_values_text = String.valueOf(accelerometer_values[0])+"\n"
@@ -231,6 +243,12 @@ public class MickaleoApp extends Activity implements SensorEventListener {
                         + String.valueOf(magnetic_field_values[1])+"\n"
                         + String.valueOf(magnetic_field_values[2]);
                 dataOutputStream.writeUTF(transmission_values_text);
+                is = new BufferedReader(new InputStreamReader(dataInputStream));
+                data_transmitted = "data transmitted: " + is.readLine();
+                //doInBackground();
+                //runOnUiThread();
+
+
                 //dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2])+"\ty-position:\t"+(1920*(accelerometer_values[2]+9.81)/19.62)+"\tx-position:\t"+(1080*(1-((magnetic_field_values[1]+45)/90))));
                 //dataOutputStream.writeUTF(String.valueOf("\n "));
             } catch (UnknownHostException e) {

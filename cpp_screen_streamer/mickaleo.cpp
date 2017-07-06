@@ -35,12 +35,17 @@ using namespace cv;
 const uint WIDTH  = 1920>>0;
 const uint HEIGHT = 1080>>0;
 
+#define MAXRCVLEN 500
+#define PORTNUM 2300
+
 // -------------------------------------------------------
 int main(){
     int socket_desc;
     struct sockaddr_in server;
     std::string message_string;
     char *message;
+
+    /*********
      
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
@@ -49,12 +54,36 @@ int main(){
         printf("Could not create socket");
     }
          
-    server.sin_addr.s_addr = inet_addr("10.0.0.139");
+    //server.sin_addr.s_addr = inet_addr("10.0.0.139");
+    server.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // set destination IP number - localhost, 127.0.0.1
     server.sin_family = AF_INET;
     server.sin_port = htons( 8888 );
  
     //Connect to remote server
-    if (connect(socket_desc , (struct sockaddr *)&server , sizeof(server)) < 0)
+    if (connect(socket_desc , (struct sockaddr *)&server , sizeof(server)) < 0)*******/
+
+   char buffer[MAXRCVLEN + 1]; /* +1 so we can add null terminator */
+   int len, mysocket;
+   struct sockaddr_in dest; 
+ 
+   mysocket = socket(AF_INET, SOCK_STREAM, 0);
+  
+   memset(&dest, 0, sizeof(dest));                /* zero the struct */
+   dest.sin_family = AF_INET;
+   dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK); /* set destination IP number - localhost, 127.0.0.1*/ 
+   dest.sin_port = htons(PORTNUM);                /* set destination port number */
+ 
+ connect(mysocket, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
+  
+   len = recv(mysocket, buffer, MAXRCVLEN, 0);
+ 
+   /* We have to null terminate the received data ourselves */
+   buffer[len] = '\0';
+ 
+   printf("Received %s (%d bytes).\n", buffer, len);
+ 
+   close(mysocket);
+   //if (connect(mysocket, (struct sockaddr *)&dest, sizeof(struct sockaddr_in)))
     {
         puts("connect error");
         return 1;
@@ -71,7 +100,7 @@ int main(){
         puts("Send failed");
         return 1;
     }
-    puts("Data Send\n");
+    puts("Data Sent\n");
 
     Display* display = XOpenDisplay(NULL);
     Window root = DefaultRootWindow(display);  // Macro to return the root window! It's a simple uint32
