@@ -35,7 +35,7 @@ public class mouse_controller {
 			float x_tracking_offset = 3F, y_tracking_offset = -4F;			
 			float mouse_x_scaling = 0.025F, mouse_y_scaling = 0.025F;
 			float mouse_x_offset = 932F, mouse_y_offset = 533F;
-			Boolean logging_active = false;
+			Boolean logging_active = true;
 		
 		// TODO Auto-generated method stub
 		System.out.print("hello world\n\n");
@@ -112,15 +112,15 @@ public class mouse_controller {
 		    System.out.println(accel_x+"\t"+accel_y+"\t"+accel_z+"\t"+magnet_x+"\t"+magnet_y+"\t"+magnet_z+"\tx:\t"+mouse_x+"\ty:\t"+mouse_y);		    
 		    }
 		    
-		    robot = new Robot();
-		    robot.mouseMove((int) mouse_x, (int) mouse_y);
+		    //robot = new Robot();
+		    //robot.mouseMove((int) mouse_x, (int) mouse_y);
 		    
 		    dataOutputStream.writeUTF("Hello!");
 		   } catch (IOException e) {
 		    // TODO Auto-generated catch block
 		    e.printStackTrace();
-		   } catch (AWTException e) {
-		   }
+		   } //catch (AWTException e) {
+		   //}
 		   finally{
 		    if( socket!= null){
 		     try {

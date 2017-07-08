@@ -71,6 +71,7 @@ public class MickaleoApp extends Activity implements SensorEventListener {
     private Sensor magneticField;
     private int rate;
     private String transmission_values_text;
+    String data_received = "";
 
     // Used to load the 'native-lib' library on application startup.
     /*static {
@@ -81,7 +82,7 @@ public class MickaleoApp extends Activity implements SensorEventListener {
     private boolean color = false;
     private View view;
     private long lastUpdate;
-    BufferedReader is = null;
+    BufferedReader is2 = null;
     String data_transmitted = "";
 
     /** Called when the activity is first created. */
@@ -219,11 +220,6 @@ public class MickaleoApp extends Activity implements SensorEventListener {
         @Override
         protected Void doInBackground(Void... params) {
 
-            // TODO Auto-generated method stub
-            Socket socket = null;
-            DataOutputStream dataOutputStream = null;
-            DataInputStream dataInputStream = null;
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -231,64 +227,157 @@ public class MickaleoApp extends Activity implements SensorEventListener {
                 }
             });
 
-            try {
-                data_transmitted = "loading data";
-                socket = new Socket("10.0.0.150", 5001);
-                dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                dataInputStream = new DataInputStream(socket.getInputStream());
-                transmission_values_text = String.valueOf(accelerometer_values[0])+"\n"
-                        + String.valueOf(accelerometer_values[1])+"\n"
-                        + String.valueOf(accelerometer_values[2])+"\n"
-                        + String.valueOf(magnetic_field_values[0])+"\n"
-                        + String.valueOf(magnetic_field_values[1])+"\n"
-                        + String.valueOf(magnetic_field_values[2]);
-                dataOutputStream.writeUTF(transmission_values_text);
-                is = new BufferedReader(new InputStreamReader(dataInputStream));
-                data_transmitted = "data transmitted: " + is.readLine();
-                //doInBackground();
-                //runOnUiThread();
+            new Thread() {
+                public void run() {
+                    Socket socket = null;
+                    //Socket socket_in = null;
+                    DataOutputStream dataOutputStream = null;
+                    //DataInputStream dataInputStream = null;
 
+                    try
 
-                //dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2])+"\ty-position:\t"+(1920*(accelerometer_values[2]+9.81)/19.62)+"\tx-position:\t"+(1080*(1-((magnetic_field_values[1]+45)/90))));
-                //dataOutputStream.writeUTF(String.valueOf("\n "));
-            } catch (UnknownHostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } finally {
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
+                    {
+                        //data_transmitted = "loading data";
+                        socket = new Socket("10.0.0.150", 8888);
+                        //socket_in = new Socket("10.0.0.150", 8887);
+
+                        dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                        transmission_values_text = String.valueOf(accelerometer_values[0]) + "\n"
+                                + String.valueOf(accelerometer_values[1]) + "\n"
+                                + String.valueOf(accelerometer_values[2]) + "\n"
+                                + String.valueOf(magnetic_field_values[0]) + "\n"
+                                + String.valueOf(magnetic_field_values[1]) + "\n"
+                                + String.valueOf(magnetic_field_values[2]);
+                        dataOutputStream.writeUTF(transmission_values_text);
+
+                        //data_transmitted = "loading data2";
+                        //is2 = new BufferedReader(new InputStreamReader(dataInputStream));
+                        //data_transmitted = "data transmitted: " + is.readLine();
+                        //InputStreamReader is3 = new InputStreamReader(dataInputStream);
+                        //data_received = String.valueOf(is3.read());
+
+                        /*dataInputStream = new DataInputStream(socket_in.getInputStream());
+                        data_transmitted = "data transmitted: ";
+                        data_received = dataInputStream.readUTF();
+                        data_transmitted = data_transmitted + data_received;*/
+
+                        //doInBackground();
+                        //runOnUiThread();
+
+                        //dataOutputStream.writeUTF(String.valueOf(accelerometer_values[0])+"\t"+String.valueOf(accelerometer_values[1])+"\t"+String.valueOf(accelerometer_values[2])+"\t"+String.valueOf(magnetic_field_values[0])+"\t"+String.valueOf(magnetic_field_values[1])+"\t"+String.valueOf(magnetic_field_values[2])+"\ty-position:\t"+(1920*(accelerometer_values[2]+9.81)/19.62)+"\tx-position:\t"+(1080*(1-((magnetic_field_values[1]+45)/90))));
+                        //dataOutputStream.writeUTF(String.valueOf("\n "));
+                    } catch (
+                            UnknownHostException e
+                            )
+
+                    {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
-                    }
-                }
+                    } catch (
+                            IOException e
+                            )
 
-                if (dataOutputStream != null) {
-                    try {
-                        dataOutputStream.close();
-                    } catch (IOException e) {
+                    {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
+                    } finally
+
+                    {
+                        if (socket != null) {
+                            try {
+                                socket.close();
+                            } catch (IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+
+                        /*if (socket_in != null) {
+                            try {
+                                socket_in.close();
+                            } catch (IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }*/
+
+                        if (dataOutputStream != null) {
+                            try {
+                                dataOutputStream.close();
+                            } catch (IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+
+                        /*if (dataInputStream != null) {
+                            try {
+                                dataInputStream.close();
+                            } catch (IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }*/
                     }
                 }
+            }.start();
 
-                if (dataInputStream != null) {
-                    try {
-                        dataInputStream.close();
-                    } catch (IOException e) {
+            new Thread() {
+                public void run() {
+                    Socket socket_in = null;
+                    DataInputStream dataInputStream = null;
+
+                    try
+                    {
+                        socket_in = new Socket("10.0.0.150", 8887);
+
+                        dataInputStream = new DataInputStream(socket_in.getInputStream());
+                        data_transmitted = "data transmitted: ";
+                        data_received = dataInputStream.readUTF();
+                        data_transmitted = data_transmitted + data_received;
+
+                    } catch (
+                            UnknownHostException e
+                            )
+
+                    {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
+                    } catch (
+                            IOException e
+                            )
+
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } finally
+
+                    {
+
+                        if (socket_in != null) {
+                            try {
+                                socket_in.close();
+                            } catch (IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+
+                        if (dataInputStream != null) {
+                            try {
+                                dataInputStream.close();
+                            } catch (IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
+            }.start();
+
+                return null;
+
             }
-
-            return null;
-
-        }
 
         @Override
         protected void onPostExecute(Void result) {
