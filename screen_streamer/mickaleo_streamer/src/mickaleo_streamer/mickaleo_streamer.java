@@ -16,12 +16,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class mickaleo_streamer {
+	
+	//public void set_
 
 	public static void main(String[] args) throws Exception {
 
-		new Thread() {
+		/*new Thread() {
 			public void run() {
-				/* grab screen */
+				// grab screen
 
 				int x = 0, y = 0, w = 1024, h = 768; // specify the region of screen to grab
 				FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(":0.0+" + x + "," + y);
@@ -63,7 +65,7 @@ public class mickaleo_streamer {
 					e.printStackTrace();
 				}
 			}
-		}.start();
+		}.start();*/
 
 		/* transfer data through network */
 		new Thread() {
@@ -254,6 +256,48 @@ public class mickaleo_streamer {
 				}
 			}
 		}.start();
+		
+		/* grab screen */
+
+		int x = 0, y = 0, w = 1024, h = 768; // specify the region of screen to grab
+		FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(":0.0+" + x + "," + y);
+		AndroidFrameConverter converterToBitmap = new AndroidFrameConverter();
+		OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+		Frame grabber_frame;
+		Mat mat;
+
+		grabber.setFormat("x11grab");
+		grabber.setImageWidth(w);
+		grabber.setImageHeight(h);
+		try {
+			grabber.start();
+		} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		CanvasFrame frame = new CanvasFrame("Screen Capture");
+
+		while (frame.isVisible()) {
+			try {
+				grabber_frame = grabber.grab();					
+				mat = converterToMat.convert(grabber_frame);
+				// mat.
+				frame.showImage(grabber.grab());
+				// System.out.println(grabber.grab());
+			} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		frame.dispose();
+		try {
+			grabber.stop();
+		} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
