@@ -1,6 +1,9 @@
 package mickaleo_streamer;
 
+
+import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacv.*;
+
 
 import java.awt.AWTException;
 import java.awt.Robot;
@@ -19,17 +22,29 @@ public class mickaleo_streamer {
 	public static void main(String[] args) throws Exception {
 
 		/* grab screen */
-		/*
-		 * int x = 0, y = 0, w = 1024, h = 768; // specify the region of screen to grab
-		 * FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(":0.0+" + x + "," + y);
-		 * grabber.setFormat("x11grab"); grabber.setImageWidth(w);
-		 * grabber.setImageHeight(h); grabber.start();
-		 * 
-		 * CanvasFrame frame = new CanvasFrame("Screen Capture"); while
-		 * (frame.isVisible()) { frame.showImage(grabber.grab());
-		 * 
-		 * } frame.dispose(); grabber.stop();
-		 */
+
+		int x = 0, y = 0, w = 1024, h = 768; // specify the region of screen to grab
+		FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(":0.0+" + x + "," + y);
+		AndroidFrameConverter converterToBitmap = new AndroidFrameConverter();
+ 	    OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+ 	    Frame grabber_frame;
+ 	    Mat mat;
+ 	    
+		grabber.setFormat("x11grab");
+		grabber.setImageWidth(w);
+		grabber.setImageHeight(h);
+		grabber.start();
+
+		CanvasFrame frame = new CanvasFrame("Screen Capture");
+		while (frame.isVisible()) {
+			grabber_frame = grabber.grab();
+			mat = converterToMat.convert(grabber_frame);
+			//mat.
+			//frame.showImage(grabber.grab());
+			//System.out.println(grabber.grab());
+		}
+		frame.dispose();
+		grabber.stop();
 
 		/* transfer data through network */
 		new Thread() {

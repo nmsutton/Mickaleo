@@ -2,9 +2,16 @@ package com.herokuapp.nmsutton.mickaleoapp2;
 
 //import android.support.v7.app.AppCompatActivity;
 //import android.os.Bundle;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 
 /***************/
 
@@ -36,6 +43,7 @@ import android.os.StrictMode;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import android.widget.Button;
@@ -65,6 +73,7 @@ public class MickaleoApp extends Activity implements SensorEventListener {
     //EditText textOut;
     TextView textIn;
     TextView socket_data;
+    ImageView imageView1;
     float[] accelerometer_values = new float[3];
     float[] magnetic_field_values = new float[3];
     private SensorManager mSensorManager;
@@ -117,6 +126,8 @@ public class MickaleoApp extends Activity implements SensorEventListener {
         button_enable.setOnClickListener(buttonEnableOnClickListener);
         Button button_disable = (Button)findViewById(R.id.button_disable);
         button_disable.setOnClickListener(buttonDisableOnClickListener);
+
+        imageView1 = (ImageView) findViewById(R.id.imageView1);
 
         //new MyTask().execute();
 
@@ -223,12 +234,31 @@ public class MickaleoApp extends Activity implements SensorEventListener {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
                     socket_data.setText(data_transmitted);
+
+                    // make a mat and draw something
+                    Mat m = Mat.zeros(100,400, CvType.CV_8UC3);
+                    //Core.putText(m, "hi there ;)", new Point(30,80), Core.FONT_HERSHEY_SCRIPT_SIMPLEX, 2.2, new Scalar(200,200,0),2);
+                    //m = imread("/sdcard/inna7_edit.jpg", CV_LOAD_IMAGE_COLOR);
+
+                    // convert to bitmap:
+                    Bitmap bm = Bitmap.createBitmap(m.cols(), m.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(m, bm);
+
+                    // find the imageview and draw it!
+                    ImageView iv = (ImageView) findViewById(R.id.imageView1);
+                    iv.setImageBitmap(bm);
                 }
+
+                //public void helloworld() {
+
+                //}
             });
 
             new Thread() {
                 public void run() {
+
                     Socket socket = null;
                     //Socket socket_in = null;
                     DataOutputStream dataOutputStream = null;
