@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.io.BufferedReader;
+import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -93,6 +94,9 @@ public class MickaleoApp extends Activity implements SensorEventListener {
     private long lastUpdate;
     BufferedReader is2 = null;
     String data_transmitted = "";
+    Mat image_transmitted = Mat.zeros(100,400, CvType.CV_8UC3);
+    //IplImage image_transmitted2 = IplImage.create(w, h, 8, 4);
+    //ImageIO.read();
 
     /** Called when the activity is first created. */
     @Override
@@ -238,7 +242,8 @@ public class MickaleoApp extends Activity implements SensorEventListener {
                     socket_data.setText(data_transmitted);
 
                     // make a mat and draw something
-                    Mat m = Mat.zeros(100,400, CvType.CV_8UC3);
+                    //Mat m = Mat.zeros(100,400, CvType.CV_8UC3);
+                    Mat m = image_transmitted;
                     //Core.putText(m, "hi there ;)", new Point(30,80), Core.FONT_HERSHEY_SCRIPT_SIMPLEX, 2.2, new Scalar(200,200,0),2);
                     //m = imread("/sdcard/inna7_edit.jpg", CV_LOAD_IMAGE_COLOR);
 
@@ -365,6 +370,8 @@ public class MickaleoApp extends Activity implements SensorEventListener {
                         data_transmitted = "data transmitted: ";
                         data_received = dataInputStream.readUTF();
                         data_transmitted = data_transmitted + data_received;
+                        /*ObjectInputStream in = new ObjectInputStream(socket_in.getInputStream());
+                        image_transmitted = (Mat) in.readObject();*/
 
                     } catch (
                             UnknownHostException e
@@ -380,7 +387,13 @@ public class MickaleoApp extends Activity implements SensorEventListener {
                     {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
-                    } finally
+                    } /*catch (
+                            ClassNotFoundException e
+                            )
+                    {
+                        e.printStackTrace();
+                    }*/
+                    finally
 
                     {
 

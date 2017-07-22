@@ -6,10 +6,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javax.imageio.ImageIO;
+
+import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.indexer.Indexer;
 import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -19,13 +24,17 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 public class run_streaming {
 
 	Mat mat_to_send;
+	int WIDTH=1024;
+	int HEIGHT=786;
+	//IplImage ipl_to_send;
 	
-	public void set_frame(Mat mat) {
-		mat_to_send = mat;
+	public void set_frame(Mat image) {
+		//mat_to_send = mat;
+		mat_to_send = image;
 	}
 	
-	public String get_frame() {
-		return mat_to_send.toString();
+	public Mat get_frame() {
+		return mat_to_send;
 	}
 
 	public void run_streaming() {
@@ -72,7 +81,7 @@ public class run_streaming {
 				float x_tracking_offset = 3F, y_tracking_offset = -4F;
 				float mouse_x_scaling = 0.025F, mouse_y_scaling = 0.025F;
 				float mouse_x_offset = 932F, mouse_y_offset = 533F;
-				Boolean logging_active = true;
+				Boolean logging_active = false;
 				try {
 
 					serverSocket = new ServerSocket(8888);
@@ -190,6 +199,7 @@ public class run_streaming {
 				Socket socket_out = null;
 				DataOutputStream dataOutputStream = null;
 				BufferedWriter dataOutputStream2 = null;
+				ObjectOutputStream objectOutputStream = null;
 
 				try {
 
@@ -205,9 +215,19 @@ public class run_streaming {
 
 						dataOutputStream = new DataOutputStream(socket_out.getOutputStream());
 						//dataOutputStream.writeUTF("Hello!\n");
-						dataOutputStream.writeUTF(get_frame());
+						
+						// export all pixel data here
+						
+						dataOutputStream.writeUTF(get_frame().createIndexer().toString());
+						
 						dataOutputStream.flush();
 						dataOutputStream.close();
+						
+						/*objectOutputStream = new ObjectOutputStream(socket_out.getOutputStream());
+						objectOutputStream.writeObject(get_frame());
+						objectOutputStream.flush();
+						objectOutputStream.close();	*/					
+						
 						/*
 						 * dataOutputStream2 = new BufferedWriter(new
 						 * OutputStreamWriter(socket.getOutputStream()));
@@ -251,16 +271,17 @@ public class run_streaming {
 
 		/* grab screen */
 
-		int x = 0, y = 0, w = 1024, h = 768; // specify the region of screen to grab
+		int x = 0, y = 0; // specify the region of screen to grab
 		FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(":0.0+" + x + "," + y);
 		AndroidFrameConverter converterToBitmap = new AndroidFrameConverter();
 		OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 		Frame grabber_frame;
 		Mat mat;
+		//IplImage image = IplImage.create(WIDTH, HEIGHT, 8, 4);
 
 		grabber.setFormat("x11grab");
-		grabber.setImageWidth(w);
-		grabber.setImageHeight(h);
+		grabber.setImageWidth(WIDTH);
+		grabber.setImageHeight(HEIGHT);
 		try {
 			grabber.start();
 		} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
@@ -273,10 +294,17 @@ public class run_streaming {
 			try {
 				grabber_frame = grabber.grab();
 				mat = converterToMat.convert(grabber_frame);
+				//image = new IplImage(mat);
+				//bitmap = converterToBitmap.convert(frame);
 				set_frame(mat);
 				// mat.
 				frame.showImage(grabber.grab());
-				// System.out.println(grabber.grab());
+				//System.out.println(mat.createIndexer().toString());
+				System.out.println("hello "+mat.createIndexer().toString().substring(0, 500));
+				System.out.print("\n");				
+				/*Indexer frame_arr = mat.createIndexer();
+				System.out.print(frame_arr.index(20));
+				System.out.print("\n");*/
 			} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
