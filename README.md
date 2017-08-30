@@ -2,9 +2,10 @@
 
 This project (code name: Mickaleo, pronunciation: mick-ah-leo) is designed to add at least basic VR to any program on Linux with any VR headset including phone and tablet headset kits. Eventually it could be a cross platform program to add VR to any program with any headset.
 
-## Software Section and Status:
+## Software Sections and Status:
 
 1.  Streamer:
+<br>www.splashtop.com/personal
 <br>www.splashtop.com/wiredxdisplay
 <br>The device currently used for testing VR streaming is a Durovis Dive 7 headset with Nexus 7 2cnd Gen tablet. Any remote desktop software is compatible but I recommend Splashtop. Splashtop wireless is free for personal use and specifically designed for high performance video game level quality streaming. It works but should be used for personal use, if you want to use it professionally, please support them. Splashtop wired connection (XDisplay) software can mirror a display at 1080p 60fps. 
 
@@ -28,6 +29,6 @@ This project (code name: Mickaleo, pronunciation: mick-ah-leo) is designed to ad
 
 ## Dependencies:
 For X11 development in the cpp_screen_streamer software:
-xorg-dev
-libx11-dev
+<br>xorg-dev
+<br>libx11-dev
 
