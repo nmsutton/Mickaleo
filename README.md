@@ -25,7 +25,7 @@ This project (code name: Mickaleo, pronunciation: mick-ah-leo) is designed to ad
 <br>/MickaleoApp2/ - android client
 <br>Work toward a Java based screen streaming app for receiving content from the server.
 <br>/alpha_release/ - software for development testing
-<br>These are versions of the programs that should work, further testing is needed before declaring them ready for release.
+<br>These are versions of the programs that should work, further testing is needed before declaring them ready for official alpha release. The java client runs successfully in the Eclipse IDE but when exported as a runnable jar a message about 'missing main class' occurs and it is being looked into how to resolve that. The other programs appear to run successfully.
 
 5.  Optional future work: Create gamepad or VR accessory interactivity with the software running so that mouse and keyboard, etc. do not need to be used.
 
