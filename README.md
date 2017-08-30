@@ -7,7 +7,7 @@ This project (code name: Mickaleo, pronunciation: mick-ah-leo) is designed to ad
 1.  Streamer:
 <br>www.splashtop.com/personal
 <br>www.splashtop.com/wiredxdisplay
-<br>The device currently used for testing VR streaming is a Durovis Dive 7 headset with Nexus 7 2cnd Gen tablet. Any remote desktop software is compatible but I recommend Splashtop. Splashtop wireless is free for personal use and specifically designed for high performance video game level quality streaming. It works but should be used for personal use, if you want to use it professionally, please support them. Splashtop wired connection (XDisplay) software can mirror a display at 1080p 60fps. 
+<br>The device currently used for testing VR streaming is a Durovis Dive 7 headset with Nexus 7 2cnd Gen tablet. Any remote desktop software is compatible but I recommend Splashtop. Also, run this over your local area network, not streaming over the internet for performance gains and avoiding excess internet data usage. Splashtop wireless is free for personal use and specifically designed for high performance video game level quality streaming. It works but should be used for personal use, if you want to use it professionally, please support them. Splashtop wired connection (XDisplay) software can mirror a display at 1080p 60fps. 
 
 2.  VR Formatter:
 <br>/cpp_screen_streamer/ 
@@ -24,6 +24,8 @@ This project (code name: Mickaleo, pronunciation: mick-ah-leo) is designed to ad
 <br>Work toward a Java based screen streaming server for more of an all-in-one solution. Currently not working but contains development code. This was worked on to avoid having to use splashtop or something separately when running the mouse control, and being able to stream directly to a headset instead of mirroring one display on another. This project is build using Eclipse Java edition.
 <br>/MickaleoApp2/ - android client
 <br>Work toward a Java based screen streaming app for receiving content from the server.
+<br>/alpha_release/ - software for development testing
+<br>These are versions of the programs that should work, further testing is needed before declaring them ready for release.
 
 5.  Optional future work: Create gamepad or VR accessory interactivity with the software running so that mouse and keyboard, etc. do not need to be used.
 
