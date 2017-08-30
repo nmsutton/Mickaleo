@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -200,6 +203,7 @@ public class run_streaming {
 				DataOutputStream dataOutputStream = null;
 				BufferedWriter dataOutputStream2 = null;
 				ObjectOutputStream objectOutputStream = null;
+				int transfer_segments;
 
 				try {
 
@@ -217,9 +221,10 @@ public class run_streaming {
 						//dataOutputStream.writeUTF("Hello!\n");
 						
 						// export all pixel data here
-						
-						dataOutputStream.writeUTF(get_frame().createIndexer().toString());
-						
+						transfer_segments = (WIDTH*HEIGHT)/50000;
+						for (int i = 0; i < transfer_segments; i++) {
+							dataOutputStream.writeUTF(get_frame().createIndexer().toString());
+						}
 						dataOutputStream.flush();
 						dataOutputStream.close();
 						
@@ -300,11 +305,28 @@ public class run_streaming {
 				// mat.
 				frame.showImage(grabber.grab());
 				//System.out.println(mat.createIndexer().toString());
-				System.out.println("hello "+mat.createIndexer().toString().substring(0, 500));
-				System.out.print("\n");				
-				/*Indexer frame_arr = mat.createIndexer();
-				System.out.print(frame_arr.index(20));
-				System.out.print("\n");*/
+				/*System.out.println("hello "+mat.createIndexer().toString().substring(0, 500));
+				System.out.print("\n");				*/
+				Indexer frame_arr = mat.createIndexer();
+				//String frame_arr_str = frame_arr.toString();
+				//List<String> frame_pixels = Arrays.asList(frame_arr_str.split(","));
+				//ArrayList frame_pixels2 = (ArrayList) (Arrays.asList(frame_arr_str.split(","))).split(",");
+				//ArrayList<List<String>> frame_total_array = (ArrayList<List<String>>) frame_pixels;
+				//Arrays.
+				//ArrayList<ArrayList<Integer>> frame_total_array = (ArrayList<Integer>) frame_pixels;
+				// ArrayList<int[]> myList = new ArrayList<int[]>((int[]) Arrays.asList(frame_arr_str.split(",")));
+				//System.out.print(frame_arr.index(1));
+				//System.out.print("\n");
+				Mat m = mat;
+				int count = (int) m.total() * m.channels();
+				// depending on Mat data type choose byte, short, int, float or double
+				byte[] buff = new byte[count];
+				
+				//m.get(0, 0, buff);
+
+				// on the other side
+				Mat z = new Mat(/* the same size and type */);
+				z.put(0, 0, buff);
 			} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
